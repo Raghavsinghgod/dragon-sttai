@@ -1,6 +1,7 @@
 import * as ort from "onnxruntime-web"
 import { frameCount, logMelFrame } from "./features"
-import { ctcGreedy } from "./decode"
+import { ctcGreedy, packPaddedLogits } from "./decode"
+import { mockDecode } from "./mock"
 import { vocab } from "./vocab"
 
 export const modelCard = {
@@ -111,58 +112,11 @@ async function runModel(feats: Float32Array, nFrames: number): Promise<string> {
     const dims = out.logits.dims as number[]
     const framesInSlice = dims[1]
     const stride = dims[2]
-    const flat = new Float32Array(framesInSlice * vocab.length)
-    for (let t = 0; t < framesInSlice; t++)
-      for (let v = 0; v < vocab.length; v++) flat[t * vocab.length + v] = logits[t * stride + v]
+    const flat = packPaddedLogits(logits, framesInSlice, stride, vocab.length)
     text += ctcGreedy(flat, framesInSlice) + " "
     await yieldToUi()
   }
   return text.trim().replace(/\s+/g, " ")
-}
-
-const mockWords = [
-  "dragon",
-  "local",
-  "voice",
-  "text",
-  "offline",
-  "hold",
-  "steady",
-  "ember",
-  "iron",
-  "quiet",
-]
-
-function mockDecode(feats: Float32Array, nFrames: number): string {
-  const energy = new Float32Array(nFrames)
-  let maxE = 0
-  for (let t = 0; t < nFrames; t++) {
-    let sum = 0
-    for (let m = 0; m < 80; m++) sum += feats[t * 80 + m]
-    energy[t] = sum
-    if (sum > maxE) maxE = sum
-  }
-  const floor = maxE * 0.45
-  const words: string[] = []
-  let inWord = false
-  let start = 0
-  for (let t = 0; t <= nFrames; t++) {
-    const voiced = t < nFrames && energy[t] > floor
-    if (voiced && !inWord) {
-      inWord = true
-      start = t
-    } else if (!voiced && inWord) {
-      inWord = false
-      const len = t - start
-      if (len >= 4) {
-        let h = 2166136261
-        for (let i = start; i < t; i += 3)
-          h = (Math.imul(h ^ Math.round(feats[i * 80] * 997), 16777619) >>> 0) % 100003
-        words.push(mockWords[h % mockWords.length])
-      }
-    }
-  }
-  return words.join(" ")
 }
 
 export async function warmup(): Promise<void> {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { ctcGreedy } from "./decode"
+import { ctcGreedy, packPaddedLogits } from "./decode"
 import { vocab } from "./vocab"
 
 const V = vocab.length
@@ -68,6 +68,27 @@ describe("ctcGreedy with default vocab", () => {
       0, 20, 21, 0, 0, 26,
     ])
     expect(ctcGreedy(text, 18)).toBe("aboptuz")
+  })
+})
+
+describe("packPaddedLogits", () => {
+  it("compacts padded strides down to vocab width", () => {
+    const padded = Float32Array.from([1, 2, 3, 90, 91, 4, 5, 6, 92, 93])
+    expect([...packPaddedLogits(padded, 2, 5, 3)]).toEqual([1, 2, 3, 4, 5, 6])
+  })
+
+  it("returns an empty array for zero frames", () => {
+    expect(packPaddedLogits(new Float32Array(16), 0, 4, 4)).toHaveLength(0)
+  })
+
+  it("is identity when stride already equals vocab width", () => {
+    const packed = seq([1, 2, 0, 3])
+    expect([...packPaddedLogits(packed, 4, V, V)]).toEqual([...packed])
+  })
+
+  it("feeds ctcGreedy identically to pre-packed logits", () => {
+    const packed = seq([1, 2, 0, 3])
+    expect(ctcGreedy(packPaddedLogits(packed, 4, V, V), 4)).toBe(ctcGreedy(packed, 4))
   })
 })
 
