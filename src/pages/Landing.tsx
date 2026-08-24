@@ -40,6 +40,18 @@ export default function Landing() {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
         style={{
+          backgroundImage:
+            "radial-gradient(circle at 22px 22px, transparent 20px, oklch(0.72 0.21 46 / 0.07) 21px, transparent 23px), radial-gradient(circle at 22px 22px, transparent 20px, oklch(0.72 0.21 46 / 0.04) 21px, transparent 23px)",
+          backgroundSize: "44px 44px",
+          backgroundPosition: "0 0, 22px 22px",
+          maskImage: "linear-gradient(to bottom, black 40%, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
+        style={{
           background:
             "radial-gradient(640px circle at 50% 12%, oklch(0.72 0.21 46 / 0.14), transparent 65%)",
         }}
