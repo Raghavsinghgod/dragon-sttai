@@ -60,12 +60,12 @@ function fmtDate(ts: number): string {
 
 const dayMs = 86400000
 
-function dailyCounts(entries: historyEntry[], days: number): number[] {
+function dailyCounts(timestamps: number[], days: number): number[] {
   const counts = new Array<number>(days).fill(0)
   const base = new Date()
   base.setHours(0, 0, 0, 0)
-  for (const e of entries) {
-    const that = new Date(e.createdAt)
+  for (const ts of timestamps) {
+    const that = new Date(ts)
     that.setHours(0, 0, 0, 0)
     const back = Math.round((base.getTime() - that.getTime()) / dayMs)
     const idx = days - 1 - back
@@ -139,6 +139,9 @@ export default function Dashboard() {
   const loaded = entries !== null && keys !== null
   const totalSeconds = entries?.reduce((acc, e) => acc + e.duration, 0) ?? 0
   const activeKeys = keys?.filter((k) => !k.revoked).length ?? 0
+  const liveKey = keys?.find((k) => k.id === liveId && !k.revoked) ?? null
+  const series =
+    entries === null ? [] : liveKey ? liveKey.runs : entries.map((e) => e.createdAt)
 
   const stats: [string, string, typeof Activity][] = [
     ["transcriptions", loaded ? String(entries!.length) : "", Activity],
@@ -227,17 +230,22 @@ export default function Dashboard() {
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp className="size-4 text-primary" />
               usage
+              <span className="font-mono text-xs font-normal text-muted-foreground">
+                · {liveKey ? liveKey.name : "all keys"}
+              </span>
             </CardTitle>
-            <span className="font-mono text-xs text-muted-foreground">{entries?.length ?? 0} all time</span>
+            <span className="font-mono text-xs text-muted-foreground">{series.length} runs</span>
           </CardHeader>
           <CardContent>
-            {entries === null ? (
+            {!loaded ? (
               <Skeleton className="h-11 w-full" />
-            ) : entries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">no runs yet.</p>
+            ) : series.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {liveKey ? `no runs yet for ${liveKey.name}.` : "no runs yet."}
+              </p>
             ) : (
               <>
-                <Sparkbars counts={dailyCounts(entries, 14)} />
+                <Sparkbars counts={dailyCounts(series, 14)} />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
                   <span>{fmtDay(Date.now() - 13 * dayMs)}</span>
                   <span>today</span>

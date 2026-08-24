@@ -6,6 +6,7 @@ export type apiKey = {
   revoked: boolean
   uses: number
   lastUsedAt: number | null
+  runs: number[]
 }
 
 const storageKey = "dragon-stt-keys"
@@ -16,6 +17,7 @@ function normalize(raw: apiKey): apiKey {
     ...raw,
     uses: typeof raw.uses === "number" ? raw.uses : 0,
     lastUsedAt: raw.lastUsedAt ?? null,
+    runs: Array.isArray(raw.runs) ? raw.runs.slice(-500) : [],
   }
 }
 
@@ -53,6 +55,7 @@ export function createKey(name: string): apiKey {
     revoked: false,
     uses: 0,
     lastUsedAt: null,
+    runs: [],
   }
   writeKeys([key, ...readKeys()])
   return key
@@ -90,9 +93,12 @@ export function setActiveKey(id: string | null): void {
 export function recordKeyUse(): void {
   const id = getActiveKeyId()
   if (!id) return
+  const now = Date.now()
   writeKeys(
     readKeys().map((k) =>
-      k.id === id ? { ...k, uses: k.uses + 1, lastUsedAt: Date.now() } : k,
+      k.id === id
+        ? { ...k, uses: k.uses + 1, lastUsedAt: now, runs: [...k.runs, now].slice(-500) }
+        : k,
     ),
   )
 }
