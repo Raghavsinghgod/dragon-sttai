@@ -84,7 +84,30 @@ export default function Landing() {
           transition={{ duration: 0.5 }}
           className="text-center max-w-xl w-full py-20"
         >
-          <DragonGlyph className="w-16 h-16 mx-auto mb-8 text-primary drop-shadow-[0_0_28px_rgba(239,106,53,0.4)]" />
+          <motion.div
+            initial={{ scale: 0.7, rotate: -10, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 110, damping: 13 }}
+            className="relative w-16 h-16 mx-auto mb-8"
+          >
+            <motion.div
+              aria-hidden
+              className="absolute -inset-6 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(closest-side, oklch(0.72 0.21 46 / 0.32), transparent)",
+              }}
+              initial={{ opacity: 0.35, scale: 0.9 }}
+              animate={{ opacity: [0.35, 0.65, 0.35], scale: [0.92, 1.06, 0.92] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            >
+              <DragonGlyph className="relative w-16 h-16 text-primary drop-shadow-[0_0_24px_rgba(239,106,53,0.45)]" />
+            </motion.div>
+          </motion.div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
             offline speech-to-text engine
           </p>
