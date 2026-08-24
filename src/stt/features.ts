@@ -47,6 +47,8 @@ function melFilterbank(): Float32Array[] {
 let re: Float32Array | null = null
 let im: Float32Array | null = null
 let rev: Uint32Array | null = null
+const twiddleCos: Float32Array[] = []
+const twiddleSin: Float32Array[] = []
 
 function initFft() {
   if (re) return
@@ -58,6 +60,18 @@ function initFft() {
     let r = 0
     for (let b = 0; b < bits; b++) if (i & (1 << b)) r |= 1 << (bits - 1 - b)
     rev![i] = r
+  }
+  for (let size = 2, s = 0; size <= fftSize; size <<= 1, s++) {
+    const half = size >> 1
+    const step = (-2 * Math.PI) / size
+    const cosT = new Float32Array(half)
+    const sinT = new Float32Array(half)
+    for (let k = 0; k < half; k++) {
+      cosT[k] = Math.cos(step * k)
+      sinT[k] = Math.sin(step * k)
+    }
+    twiddleCos[s] = cosT
+    twiddleSin[s] = sinT
   }
 }
 
@@ -75,14 +89,14 @@ function fft() {
       im![j] = tmp
     }
   }
-  for (let size = 2; size <= n; size <<= 1) {
+  for (let size = 2, s = 0; size <= n; size <<= 1, s++) {
     const half = size >> 1
-    const step = (-2 * Math.PI) / size
+    const cosTable = twiddleCos[s]
+    const sinTable = twiddleSin[s]
     for (let start = 0; start < n; start += size) {
       for (let k = 0; k < half; k++) {
-        const ang = step * k
-        const wr = Math.cos(ang)
-        const wi = Math.sin(ang)
+        const wr = cosTable[k]
+        const wi = sinTable[k]
         const i = start + k
         const j = i + half
         const xr = re![j] * wr - im![j] * wi

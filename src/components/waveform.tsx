@@ -6,20 +6,37 @@ type waveformProps = {
   active: boolean
 }
 
+function fit(canvas: HTMLCanvasElement): { ctx: CanvasRenderingContext2D; w: number; h: number } | null {
+  const dpr = window.devicePixelRatio || 1
+  const w = canvas.clientWidth
+  const h = canvas.clientHeight
+  if (w === 0 || h === 0) return null
+  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+    canvas.width = Math.round(w * dpr)
+    canvas.height = Math.round(h * dpr)
+  }
+  const ctx = canvas.getContext("2d")
+  if (!ctx) return null
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  return { ctx, w, h }
+}
+
 export function Waveform({ analyser, pcm, active }: waveformProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
     let raf = 0
     const buf = new Uint8Array(1024)
 
     const drawLive = () => {
-      const w = canvas.width
-      const h = canvas.height
+      const fitted = fit(canvas)
+      if (!fitted) {
+        raf = requestAnimationFrame(drawLive)
+        return
+      }
+      const { ctx, w, h } = fitted
       ctx.fillStyle = "#14110d"
       ctx.fillRect(0, 0, w, h)
       if (analyser) {
@@ -39,8 +56,9 @@ export function Waveform({ analyser, pcm, active }: waveformProps) {
     }
 
     const drawStatic = () => {
-      const w = canvas.width
-      const h = canvas.height
+      const fitted = fit(canvas)
+      if (!fitted) return
+      const { ctx, w, h } = fitted
       ctx.fillStyle = "#14110d"
       ctx.fillRect(0, 0, w, h)
       if (pcm && pcm.length) {
@@ -64,7 +82,11 @@ export function Waveform({ analyser, pcm, active }: waveformProps) {
     } else {
       drawStatic()
     }
-    return () => cancelAnimationFrame(raf)
+    window.addEventListener("resize", drawStatic)
+    return () => {
+      window.removeEventListener("resize", drawStatic)
+      cancelAnimationFrame(raf)
+    }
   }, [analyser, pcm, active])
 
   return (
@@ -72,7 +94,7 @@ export function Waveform({ analyser, pcm, active }: waveformProps) {
       ref={canvasRef}
       width={640}
       height={120}
-      className="w-full h-[120px] rounded-lg border border-border/60"
+      className="h-[120px] w-full rounded-lg border border-border/60"
     />
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
 import {
@@ -152,14 +152,17 @@ export default function Dashboard() {
       : scope === "all"
         ? null
         : (keys?.find((k) => k.id === scope) ?? null)
-  const scopeRuns =
-    entries === null
-      ? []
-      : scopeKey
-        ? scopeKey.runs
-        : scope === "all"
-          ? entries.map((e) => e.createdAt)
-          : []
+  const scopeRuns = useMemo(
+    () =>
+      entries === null
+        ? []
+        : scopeKey
+          ? scopeKey.runs
+          : scope === "all"
+            ? entries.map((e) => e.createdAt)
+            : [],
+    [entries, scopeKey, scope],
+  )
   const scopeLabel = scopeKey
     ? scope === "live"
       ? `${scopeKey.name} · live`

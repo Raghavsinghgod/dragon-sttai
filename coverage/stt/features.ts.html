@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>109/109</span>
+                <span class='fraction'>125/125</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>86/86</span>
+                <span class='fraction'>98/98</span>
             </div>
         
             
@@ -186,7 +186,21 @@
 <a name='L121'></a><a href='#L121'>121</a>
 <a name='L122'></a><a href='#L122'>122</a>
 <a name='L123'></a><a href='#L123'>123</a>
-<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -235,6 +249,8 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">20x</span>
@@ -247,6 +263,18 @@
 <span class="cline-any cline-yes">4608x</span>
 <span class="cline-any cline-yes">512x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">511x</span>
+<span class="cline-any cline-yes">511x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -264,11 +292,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">90x</span>
 <span class="cline-any cline-yes">90x</span>
 <span class="cline-any cline-yes">90x</span>
 <span class="cline-any cline-yes">90x</span>
 <span class="cline-any cline-yes">5110x</span>
-<span class="cline-any cline-yes">23040x</span>
 <span class="cline-any cline-yes">23040x</span>
 <span class="cline-any cline-yes">23040x</span>
 <span class="cline-any cline-yes">23040x</span>
@@ -358,6 +386,8 @@ function melFilterbank(): Float32Array[] {
 let re: Float32Array | null = null
 let im: Float32Array | null = null
 let rev: Uint32Array | null = null
+const twiddleCos: Float32Array[] = []
+const twiddleSin: Float32Array[] = []
 &nbsp;
 function initFft() {
   if (re) return
@@ -369,6 +399,18 @@ function initFft() {
     let r = 0
     for (let b = 0; b &lt; bits; b++) if (i &amp; (1 &lt;&lt; b)) r |= 1 &lt;&lt; (bits - 1 - b)
     rev![i] = r
+  }
+  for (let size = 2, s = 0; size &lt;= fftSize; size &lt;&lt;= 1, s++) {
+    const half = size &gt;&gt; 1
+    const step = (-2 * Math.PI) / size
+    const cosT = new Float32Array(half)
+    const sinT = new Float32Array(half)
+    for (let k = 0; k &lt; half; k++) {
+      cosT[k] = Math.cos(step * k)
+      sinT[k] = Math.sin(step * k)
+    }
+    twiddleCos[s] = cosT
+    twiddleSin[s] = sinT
   }
 }
 &nbsp;
@@ -386,14 +428,14 @@ function fft() {
       im![j] = tmp
     }
   }
-  for (let size = 2; size &lt;= n; size &lt;&lt;= 1) {
+  for (let size = 2, s = 0; size &lt;= n; size &lt;&lt;= 1, s++) {
     const half = size &gt;&gt; 1
-    const step = (-2 * Math.PI) / size
+    const cosTable = twiddleCos[s]
+    const sinTable = twiddleSin[s]
     for (let start = 0; start &lt; n; start += size) {
       for (let k = 0; k &lt; half; k++) {
-        const ang = step * k
-        const wr = Math.cos(ang)
-        const wi = Math.sin(ang)
+        const wr = cosTable[k]
+        const wi = sinTable[k]
         const i = start + k
         const j = i + half
         const xr = re![j] * wr - im![j] * wi
@@ -439,7 +481,7 @@ export function logMelFrame(pcm: Float32Array, start: number, out: Float32Array)
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-24T15:49:36.989Z
+                at 2026-08-24T15:57:05.182Z
             </div>
         <script src="../prettify.js"></script>
         <script>
