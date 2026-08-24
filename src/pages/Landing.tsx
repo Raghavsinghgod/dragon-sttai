@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Link } from "react-router"
+import { Link, NavLink } from "react-router"
 import { Button } from "@/components/ui/button"
 
 export function DragonGlyph({ className }: { className?: string }) {
@@ -52,9 +52,15 @@ export default function Landing() {
           </Link>
           <div className="flex items-center gap-3 text-xs text-muted-foreground sm:gap-4 sm:text-sm">
             {navLinks.map(([to, label]) => (
-              <Link key={to} to={to} className="hover:text-foreground transition-colors">
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `transition-colors ${isActive ? "text-primary" : "hover:text-foreground"}`
+                }
+              >
                 {label}
-              </Link>
+              </NavLink>
             ))}
           </div>
         </nav>
@@ -86,6 +92,13 @@ export default function Landing() {
               <Link to="/dashboard">open console</Link>
             </Button>
           </div>
+          <div className="mt-6 flex flex-wrap justify-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            {["int8 quantized", "1.8m params", "4.2 mb weights", "0 network calls"].map((chip) => (
+              <span key={chip} className="rounded-full border border-border/60 px-3 py-1">
+                {chip}
+              </span>
+            ))}
+          </div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -97,6 +110,10 @@ export default function Landing() {
                 <span className="text-primary">›</span> {line}
               </p>
             ))}
+            <p>
+              <span className="text-primary">›</span>{" "}
+              <span className="ml-0.5 inline-block h-3 w-1.5 translate-y-0.5 animate-pulse bg-primary" />
+            </p>
           </motion.div>
           <div className="mt-16 grid gap-px overflow-hidden rounded-lg border border-border/60 bg-border/60 text-left sm:grid-cols-3">
             {features.map(([title, body], i) => (
@@ -105,7 +122,7 @@ export default function Landing() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 + i * 0.1, duration: 0.5 }}
-                className="bg-card p-5"
+                className="bg-card p-5 transition-colors hover:bg-accent/30"
               >
                 <p className="text-sm font-medium">{title}</p>
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{body}</p>

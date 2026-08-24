@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import { Mic, Play } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -160,19 +161,25 @@ export default function Studio() {
           <Waveform analyser={analyser} pcm={pcm} active={recording} />
           <div className="flex items-center justify-between gap-3 flex-wrap">
             {recording ? (
-              <Button variant="destructive" onClick={stopRecording}>
+              <Button variant="destructive" onClick={stopRecording} className="gap-2">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-white" />
+                </span>
                 stop ({fmt(elapsed)})
               </Button>
             ) : (
-              <Button onClick={startRecording} disabled={busy}>
+              <Button onClick={startRecording} disabled={busy} className="gap-2">
+                <Mic className="size-4" />
                 record
               </Button>
             )}
-            <label className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
               upload audio
               <input type="file" accept="audio/*" onChange={onUpload} className="hidden" />
             </label>
-            <Button onClick={runTranscribe} disabled={!pcm || busy || recording}>
+            <Button onClick={runTranscribe} disabled={!pcm || busy || recording} className="gap-2">
+              <Play className="size-4" />
               transcribe
             </Button>
           </div>

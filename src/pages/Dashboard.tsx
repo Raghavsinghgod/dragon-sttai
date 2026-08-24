@@ -255,7 +255,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 * i, duration: 0.35 }}
           >
-            <Card className="border-border/60">
+            <Card className="border-border/60 transition-shadow hover:shadow-lg hover:shadow-primary/10">
               <CardContent className="pt-5 pb-5">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Icon className="size-4" />

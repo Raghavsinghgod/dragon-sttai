@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Flame } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -47,10 +48,19 @@ export default function ModelPage() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">status</span>
             <span
-              className={`text-sm font-medium ${
+              className={`inline-flex items-center gap-2 text-sm font-medium ${
                 state === "ready" || state === "mock" ? "text-primary" : "text-muted-foreground"
               }`}
             >
+              <span
+                className={`size-1.5 rounded-full ${
+                  state === "loading"
+                    ? "animate-pulse bg-primary"
+                    : state === "cold"
+                      ? "bg-muted-foreground/50"
+                      : "bg-primary"
+                }`}
+              />
               loaded / {stateLabel[state]}
             </span>
           </div>
@@ -62,7 +72,8 @@ export default function ModelPage() {
               </div>
             ))}
           </div>
-          <Button onClick={runWarmup} disabled={warming}>
+          <Button onClick={runWarmup} disabled={warming} className="gap-2">
+            <Flame className={`size-4 ${warming ? "animate-pulse" : ""}`} />
             {warming ? "warming..." : "warmup"}
           </Button>
           <p className="text-xs text-muted-foreground leading-relaxed">

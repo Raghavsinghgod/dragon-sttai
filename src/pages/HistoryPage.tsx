@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react"
+import { FileAudio } from "lucide-react"
+import { Link } from "react-router"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -44,12 +46,18 @@ export default function HistoryPage() {
           </div>
         )}
         {entries !== null && entries.length === 0 && (
-          <p className="text-sm text-muted-foreground">no transcriptions yet.</p>
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border/60 py-12 text-center">
+            <FileAudio className="size-6 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">no transcriptions yet.</p>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/studio">open studio</Link>
+            </Button>
+          </div>
         )}
         {entries?.map((e) => {
           const open = openId === e.id
           return (
-            <Card key={e.id} className="border-border/60">
+            <Card key={e.id} className="border-border/60 transition-colors hover:border-primary/40">
               <CardContent className="pt-4 pb-4">
                 <button
                   className="w-full text-left"
