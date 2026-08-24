@@ -29,6 +29,17 @@ def load_vocab(path):
     return list(default_vocab)
 
 
+def load_audio(path):
+    try:
+        import soundfile
+
+        data, sr = soundfile.read(path, dtype="float32", always_2d=True)
+        return torch.from_numpy(data.T).mean(0), sr
+    except ImportError:
+        wav, sr = torchaudio.load(path)
+        return wav.mean(0), sr
+
+
 def log_mel(wav):
     spec = torchaudio.transforms.MelSpectrogram(
         sample_rate,
@@ -40,7 +51,7 @@ def log_mel(wav):
         n_mels=n_mels,
         window_fn=torch.hamming_window,
         power=2.0,
-        htk=True,
+        mel_scale="htk",
         norm=None,
     )(wav.unsqueeze(0))
     return (spec + floor).log().squeeze(0).T
@@ -56,8 +67,7 @@ class Clips(Dataset):
 
     def __getitem__(self, index):
         path, text = self.rows[index]
-        wav, sr = torchaudio.load(path)
-        wav = wav.mean(0)
+        wav, sr = load_audio(path)
         if sr != sample_rate:
             wav = torchaudio.functional.resample(wav, sr, sample_rate)
         feats = log_mel(wav)
@@ -149,7 +159,7 @@ def main():
     train_rows, val_rows = rows[split:], rows[:split]
     print(f"clips {len(train_rows)} val {len(val_rows)} vocab {len(vocab)}")
 
-    train_loader = DataLoader(Clips(train_rows, vocab), batch_size=args.batch_size, shuffle=True, collate_fn=collate, num_workers=2)
+    train_loader = DataLoader(Clips(train_rows, vocab), batch_size=args.batch_size, shuffle=True, collate_fn=collate)
     val_loader = DataLoader(Clips(val_rows, vocab), batch_size=args.batch_size, collate_fn=collate) if val_rows else None
 
     model = Dragon(len(vocab))
