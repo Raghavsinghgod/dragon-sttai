@@ -208,6 +208,13 @@ export default function Dashboard() {
               <Terminal className="size-4 text-primary" />
               wire it up
             </CardTitle>
+            <Link
+              to="/docs"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              embed guide
+              <ArrowRight className="size-3.5" />
+            </Link>
           </CardHeader>
           <CardContent className="space-y-4">
             <ol className="list-decimal space-y-1 pl-4 text-sm text-muted-foreground">

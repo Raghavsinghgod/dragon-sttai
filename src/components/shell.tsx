@@ -4,6 +4,7 @@ import { DragonGlyph } from "@/pages/Landing"
 const links = [
   ["/studio", "studio"],
   ["/dashboard", "console"],
+  ["/docs", "docs"],
   ["/history", "history"],
   ["/model", "model"],
 ]
@@ -17,7 +18,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <DragonGlyph className="w-5 h-5" />
             <span className="font-semibold tracking-wide">dragon stt</span>
           </Link>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground sm:gap-4 sm:text-sm">
             {links.map(([to, label]) => (
               <Link key={to} to={to} className="hover:text-foreground transition-colors">
                 {label}
