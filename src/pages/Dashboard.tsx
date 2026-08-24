@@ -5,10 +5,12 @@ import {
   Activity,
   ArrowRight,
   Ban,
+  Check,
   Circle,
   CircleDot,
   Copy,
   KeyRound,
+  ListFilter,
   Plus,
   RotateCcw,
   Terminal,
@@ -20,6 +22,13 @@ import { Link } from "react-router"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -127,6 +136,7 @@ export default function Dashboard() {
   const [newName, setNewName] = useState("")
   const [revealed, setRevealed] = useState<apiKey | null>(null)
   const [liveId, setLiveId] = useState<string | null>(null)
+  const [scope, setScope] = useState("live")
 
   useEffect(() => {
     listEntries()
@@ -140,8 +150,37 @@ export default function Dashboard() {
   const totalSeconds = entries?.reduce((acc, e) => acc + e.duration, 0) ?? 0
   const activeKeys = keys?.filter((k) => !k.revoked).length ?? 0
   const liveKey = keys?.find((k) => k.id === liveId && !k.revoked) ?? null
-  const series =
-    entries === null ? [] : liveKey ? liveKey.runs : entries.map((e) => e.createdAt)
+  const scopeKey =
+    scope === "live"
+      ? liveKey
+      : scope === "all"
+        ? null
+        : (keys?.find((k) => k.id === scope) ?? null)
+  const scopeRuns =
+    entries === null
+      ? []
+      : scopeKey
+        ? scopeKey.runs
+        : scope === "all"
+          ? entries.map((e) => e.createdAt)
+          : []
+  const scopeLabel = scopeKey
+    ? scope === "live"
+      ? `${scopeKey.name} · live`
+      : scopeKey.name
+    : scope === "all"
+      ? "all keys"
+      : scope === "live"
+        ? "no live key"
+        : "deleted key"
+  const emptyText =
+    scope === "all"
+      ? "no runs yet."
+      : scopeKey
+        ? `no runs yet for ${scopeKey.name}.`
+        : scope === "live"
+          ? "mark a key live to chart it."
+          : "this key was deleted."
 
   const stats: [string, string, typeof Activity][] = [
     ["transcriptions", loaded ? String(entries!.length) : "", Activity],
@@ -230,22 +269,45 @@ export default function Dashboard() {
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp className="size-4 text-primary" />
               usage
-              <span className="font-mono text-xs font-normal text-muted-foreground">
-                · {liveKey ? liveKey.name : "all keys"}
-              </span>
             </CardTitle>
-            <span className="font-mono text-xs text-muted-foreground">{series.length} runs</span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-muted-foreground">{scopeRuns.length} runs</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2 font-mono text-xs">
+                    <ListFilter className="size-3.5" />
+                    {scopeLabel}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setScope("live")}>
+                    live key
+                    {scope === "live" && <Check className="ml-auto size-3.5" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setScope("all")}>
+                    all keys
+                    {scope === "all" && <Check className="ml-auto size-3.5" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {(keys ?? []).map((k) => (
+                    <DropdownMenuItem key={k.id} onClick={() => setScope(k.id)}>
+                      {k.name}
+                      {k.revoked ? " (revoked)" : ""}
+                      {scope === k.id && <Check className="ml-auto size-3.5" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </CardHeader>
           <CardContent>
             {!loaded ? (
               <Skeleton className="h-11 w-full" />
-            ) : series.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {liveKey ? `no runs yet for ${liveKey.name}.` : "no runs yet."}
-              </p>
+            ) : scopeRuns.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{emptyText}</p>
             ) : (
               <>
-                <Sparkbars counts={dailyCounts(series, 14)} />
+                <Sparkbars counts={dailyCounts(scopeRuns, 14)} />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
                   <span>{fmtDay(Date.now() - 13 * dayMs)}</span>
                   <span>today</span>
