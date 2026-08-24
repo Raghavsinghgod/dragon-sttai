@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router"
-import { DragonGlyph } from "@/pages/Landing"
+import { DragonGlyph } from "@/pages/landing"
 
 const links = [
   ["/studio", "studio"],

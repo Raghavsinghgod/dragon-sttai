@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router"
 import { Button } from "@/components/ui/button"
-import { DragonGlyph } from "@/pages/Landing"
+import { DragonGlyph } from "@/pages/landing"
 
 export default function NotFound() {
   return (
