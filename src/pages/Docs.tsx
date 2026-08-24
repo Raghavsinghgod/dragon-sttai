@@ -1,8 +1,73 @@
 import { toast } from "sonner"
-import { Copy } from "lucide-react"
+import { Copy, Download } from "lucide-react"
 import { Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Shell } from "@/components/shell"
+import {
+  bundleText,
+  downloadBlob,
+  makeZip,
+  type filePair,
+} from "@/lib/bundle"
+import { vocab } from "@/stt/vocab"
+
+const sttSources = import.meta.glob("../../stt/*.ts", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>
+
+const starterReadme = `dragon stt runtime starter
+
+contents
+  src/stt/         audio decode, log-mel features, ctc decode, engine, vocab
+  public/models/   vocab.json template + where weights go
+
+setup
+  1. install onnxruntime-web in your host app
+  2. copy its wasm binaries into public/ort/
+  3. drop dragon-stt.onnx int8 weights into public/models/
+  4. wire it:
+
+       const { pcm } = await blobToPcm(recorded)
+       const { text, modelVer } = await transcribe(pcm, (stage) => log(stage))
+
+  5. kill the network after first load and confirm transcription still runs
+
+api key
+  mint a project key in the dragon console and paste it into your app config.
+  keys are local identifiers only; nothing phones home.
+
+full guide lives at /docs on the dragon stt site.`
+
+const modelsReadme = `dragon-stt.onnx goes here: int8, input inputs [1,T,80] float32,
+output logits [1,T,V]. target under 15 mb.
+
+vocab.json ships as the default char set plus a trailing blank token.
+replace it with the file produced by your export step so ids match
+the trained weights.`
+
+function collectFiles(): filePair[] {
+  const files: filePair[] = Object.entries(sttSources)
+    .map(([k, v]) => ["src/" + k.replace(/^(?:\.\.\/)+/, ""), v] as filePair)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+  files.push(["public/models/vocab.json", JSON.stringify([...vocab, ""], null, 2)])
+  files.push(["public/models/readme.txt", modelsReadme])
+  files.push(["readme.txt", starterReadme])
+  return files
+}
+
+function downloadStarter() {
+  downloadBlob(makeZip(collectFiles()), "dragon-stt-starter.zip")
+  toast.success("starter.zip downloaded")
+}
+
+function copyAll() {
+  navigator.clipboard.writeText(bundleText(collectFiles())).then(
+    () => toast.success("all sources copied"),
+    () => toast.error("copy failed"),
+  )
+}
 
 const toc = [
   ["layout", "project layout"],
@@ -153,6 +218,21 @@ export default function Docs() {
           <code className="font-mono">/models</code>.
         </p>
         <CodeBlock code={layoutTree} />
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={downloadStarter}>
+            <Download className="size-3.5" />
+            download starter.zip
+          </Button>
+          <Button size="sm" variant="outline" onClick={copyAll}>
+            <Copy className="size-3.5" />
+            copy all sources
+          </Button>
+        </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          the zip bundles all five modules, a matching vocab.json template and setup readmes,
+          built client-side at download time. ort wasm binaries stay binary — copy them from
+          onnxruntime-web dist into your public/ort folder.
+        </p>
       </Section>
 
       <Section id="install" title="install">
