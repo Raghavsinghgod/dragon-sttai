@@ -40,6 +40,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Shell } from "@/components/shell"
+import { dailyCounts, dayMs } from "@/lib/chart"
 import { listEntries, type historyEntry } from "@/lib/db"
 import { getProfile } from "@/lib/profile"
 import {
@@ -65,22 +66,6 @@ function copySecret(secret: string) {
 
 function fmtDate(ts: number): string {
   return new Date(ts).toLocaleDateString()
-}
-
-const dayMs = 86400000
-
-function dailyCounts(timestamps: number[], days: number): number[] {
-  const counts = new Array<number>(days).fill(0)
-  const base = new Date()
-  base.setHours(0, 0, 0, 0)
-  for (const ts of timestamps) {
-    const that = new Date(ts)
-    that.setHours(0, 0, 0, 0)
-    const back = Math.round((base.getTime() - that.getTime()) / dayMs)
-    const idx = days - 1 - back
-    if (idx >= 0 && idx < days) counts[idx]++
-  }
-  return counts
 }
 
 function fmtDay(ts: number): string {
