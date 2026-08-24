@@ -25,6 +25,9 @@ jobs:
         run: bun run lint
       - name: test
         run: bun run test:coverage
+      - name: coverage summary
+        if: always()
+        run: bun scripts/coverage-summary.ts >> "$GITHUB_STEP_SUMMARY"
       - name: coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
