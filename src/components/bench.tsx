@@ -49,7 +49,7 @@ function parseManifest(json: unknown): benchItem[] | null {
       label: nameFromUrl(spec.url),
       text: typeof spec.text === "string" ? spec.text : undefined,
       load: async () => {
-        const res = await fetch(spec.url as string)
+        const res = await fetch(spec.url as string, { signal: AbortSignal.timeout(30000) })
         if (!res.ok) throw new Error(`fetch failed ${res.status}`)
         return res.blob()
       },
@@ -58,8 +58,24 @@ function parseManifest(json: unknown): benchItem[] | null {
   return items.length ? items : null
 }
 
+function readSavedManifest(): string {
+  try {
+    return localStorage.getItem(manifestKey) ?? ""
+  } catch {
+    return ""
+  }
+}
+
+function rememberManifest(url: string): void {
+  try {
+    localStorage.setItem(manifestKey, url)
+  } catch {
+    return
+  }
+}
+
 export function Bench() {
-  const [manifestUrl, setManifestUrl] = useState(() => localStorage.getItem(manifestKey) ?? "")
+  const [manifestUrl, setManifestUrl] = useState(readSavedManifest)
   const [items, setItems] = useState<benchItem[] | null>(null)
   const [loadingManifest, setLoadingManifest] = useState(false)
   const [running, setRunning] = useState(false)
@@ -76,13 +92,13 @@ export function Bench() {
     }
     setLoadingManifest(true)
     try {
-      const res = await fetch(target)
+      const res = await fetch(target, { signal: AbortSignal.timeout(30000) })
       if (!res.ok) throw new Error("bad status")
       const parsed = parseManifest(await res.json())
       if (!parsed) throw new Error("bad shape")
       setItems(parsed)
       setRows([])
-      localStorage.setItem(manifestKey, target)
+      rememberManifest(target)
       toast.success(`${parsed.length} samples loaded`)
     } catch {
       toast.error("could not load manifest · check url and cors headers")

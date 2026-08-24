@@ -109,6 +109,11 @@ export default function Studio() {
   const onUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error("audio too large (200 mb max)")
+      e.target.value = ""
+      return
+    }
     setResult(null)
     await loadBlob(file)
     e.target.value = ""
