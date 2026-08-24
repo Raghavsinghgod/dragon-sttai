@@ -80,8 +80,8 @@ run("export_onnx.py", "--ckpt", str(work / "smoke.pt"), "--out-dir", str(work))
 model_path = work / "dragon-stt.onnx"
 size_mb = model_path.stat().st_size / 1e6
 session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
-input_name = session.input_names[0]
-output_name = session.output_names[0]
+input_name = session.get_inputs()[0].name
+output_name = session.get_outputs()[0].name
 for frames in (200, 77):
     logits = session.run([output_name], {input_name: __import__("numpy").zeros((1, frames, 80), dtype="float32")})[0]
     assert list(logits.shape) == [1, frames, 29], f"bad logits shape {logits.shape}"

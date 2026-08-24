@@ -2,5 +2,6 @@ torch>=2.2
 torchaudio>=2.2
 soundfile>=0.12
 onnx>=1.15
+onnxscript
 onnxruntime>=1.17
 numpy<2

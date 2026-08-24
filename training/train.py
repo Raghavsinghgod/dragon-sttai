@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import random
 from pathlib import Path
 
@@ -149,6 +150,7 @@ def main():
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
+    torch.set_num_threads(min(8, os.cpu_count() or 4))
 
     vocab = load_vocab(args.vocab_out)
     Path(args.vocab_out).write_text(json.dumps(vocab))

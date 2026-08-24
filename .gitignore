@@ -3,3 +3,8 @@ node_modules
 dist
 coverage
 src/convex/_generated
+training/data
+training/smoke_work
+training/*.pt
+training/vocab.json
+__pycache__/
