@@ -78,6 +78,18 @@ function fmtDay(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" })
 }
 
+function fmtAgo(ts: number | null): string {
+  if (!ts) return "never"
+  const m = Math.floor((Date.now() - ts) / 60000)
+  if (m < 1) return "just now"
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `${d}d ago`
+  return fmtDate(ts)
+}
+
 function Sparkbars({ counts }: { counts: number[] }) {
   const max = Math.max(1, ...counts)
   return (
@@ -264,6 +276,12 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium">{k.name}</p>
                       <p className="font-mono text-xs text-muted-foreground">{maskSecret(k.secret)}</p>
                     </div>
+                    <span
+                      className="font-mono text-xs text-muted-foreground"
+                      title={k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : undefined}
+                    >
+                      used {fmtAgo(k.lastUsedAt)}
+                    </span>
                     <span className="font-mono text-xs text-muted-foreground">{k.uses} runs</span>
                     <span className="text-xs text-muted-foreground">{fmtDate(k.createdAt)}</span>
                     {k.revoked ? (
