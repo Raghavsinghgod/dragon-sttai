@@ -14,6 +14,7 @@ import {
   Terminal,
   Timer,
   Trash2,
+  TrendingUp,
 } from "lucide-react"
 import { Link } from "react-router"
 import { Badge } from "@/components/ui/badge"
@@ -55,6 +56,56 @@ function copySecret(secret: string) {
 
 function fmtDate(ts: number): string {
   return new Date(ts).toLocaleDateString()
+}
+
+const dayMs = 86400000
+
+function dailyCounts(entries: historyEntry[], days: number): number[] {
+  const counts = new Array<number>(days).fill(0)
+  const base = new Date()
+  base.setHours(0, 0, 0, 0)
+  for (const e of entries) {
+    const that = new Date(e.createdAt)
+    that.setHours(0, 0, 0, 0)
+    const back = Math.round((base.getTime() - that.getTime()) / dayMs)
+    const idx = days - 1 - back
+    if (idx >= 0 && idx < days) counts[idx]++
+  }
+  return counts
+}
+
+function fmtDay(ts: number): string {
+  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+}
+
+function Sparkbars({ counts }: { counts: number[] }) {
+  const max = Math.max(1, ...counts)
+  return (
+    <svg
+      viewBox={`0 0 ${counts.length * 12} 44`}
+      className="h-11 w-full"
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="transcriptions per day"
+    >
+      {counts.map((c, i) => {
+        const h = c === 0 ? 3 : Math.max(5, Math.round((c / max) * 41))
+        return (
+          <rect
+            key={i}
+            x={i * 12 + 1}
+            y={44 - h}
+            width={8}
+            height={h}
+            rx={1.5}
+            className={c === 0 ? "fill-muted" : "fill-primary"}
+          >
+            <title>{`${c} runs`}</title>
+          </rect>
+        )
+      })}
+    </svg>
+  )
 }
 
 export default function Dashboard() {
@@ -159,6 +210,31 @@ export default function Dashboard() {
       </div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15, duration: 0.4 }}>
+        <Card className="mt-6 border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TrendingUp className="size-4 text-primary" />
+              usage
+            </CardTitle>
+            <span className="font-mono text-xs text-muted-foreground">{entries?.length ?? 0} all time</span>
+          </CardHeader>
+          <CardContent>
+            {entries === null ? (
+              <Skeleton className="h-11 w-full" />
+            ) : entries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">no runs yet.</p>
+            ) : (
+              <>
+                <Sparkbars counts={dailyCounts(entries, 14)} />
+                <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+                  <span>{fmtDay(Date.now() - 13 * dayMs)}</span>
+                  <span>today</span>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="mt-6 border-border/60">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base">api keys</CardTitle>
