@@ -3,6 +3,7 @@ import { DragonGlyph } from "@/pages/Landing"
 
 const links = [
   ["/studio", "studio"],
+  ["/dashboard", "console"],
   ["/history", "history"],
   ["/model", "model"],
 ]

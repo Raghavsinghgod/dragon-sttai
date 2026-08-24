@@ -24,7 +24,7 @@ export function Waveform({ analyser, pcm, active }: waveformProps) {
       ctx.fillRect(0, 0, w, h)
       if (analyser) {
         analyser.getByteTimeDomainData(buf)
-        ctx.strokeStyle = "#e8933a"
+        ctx.strokeStyle = "#ef6a35"
         ctx.lineWidth = 2
         ctx.beginPath()
         for (let i = 0; i < buf.length; i++) {
@@ -46,7 +46,7 @@ export function Waveform({ analyser, pcm, active }: waveformProps) {
       if (pcm && pcm.length) {
         const bars = Math.min(160, Math.floor(w / 4))
         const per = Math.floor(pcm.length / bars)
-        ctx.fillStyle = active ? "#e8933a" : "#7a6a52"
+        ctx.fillStyle = active ? "#ef6a35" : "#7a6a52"
         for (let b = 0; b < bars; b++) {
           let peak = 0
           for (let i = 0; i < per; i += 8) {
