@@ -309,6 +309,7 @@ export default function Docs() {
         <ul className="list-disc space-y-1 pl-4 text-sm leading-relaxed text-muted-foreground">
           <li>copy src/stt and public/ort into the host app</li>
           <li>place dragon-stt.onnx and vocab.json under public/models</li>
+          <li>optional: install weights from any cors url or disk on the model page — fetched once into indexeddb, inference stays on device</li>
           <li>keep wasm same-origin at /ort, numThreads 1</li>
           <li>after first load, kill the network: transcription must still work</li>
         </ul>

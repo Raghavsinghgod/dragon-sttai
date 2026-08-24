@@ -3,6 +3,7 @@ import { frameCount, logMelFrame } from "./features"
 import { ctcGreedy, packPaddedLogits } from "./decode"
 import { mockDecode } from "./mock"
 import { vocab } from "./vocab"
+import { getStoredVocab, getWeights } from "../lib/modelStore"
 
 export const modelCard = {
   name: "dragon-stt",
@@ -13,9 +14,11 @@ export const modelCard = {
 }
 
 export type engineState = "cold" | "loading" | "ready" | "mock"
+export type engineSource = "stored" | "bundled" | "mock"
 
 let session: ort.InferenceSession | null = null
 let state: engineState = "cold"
+let source: engineSource = "mock"
 let stateListeners: ((s: engineState) => void)[] = []
 
 function setState(s: engineState) {
@@ -49,19 +52,44 @@ async function weightsExist(): Promise<boolean> {
 
 const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0))
 
+export function getEngineSource(): engineSource {
+  return source
+}
+
+export async function resetEngine(): Promise<void> {
+  if (session) await session.release().catch(() => undefined)
+  session = null
+  source = "mock"
+  setState("cold")
+}
+
+const sessionOpts = {
+  executionProviders: ["wasm"] as string[],
+  graphOptimizationLevel: "all" as const,
+}
+
 export async function loadEngine(): Promise<engineState> {
   if (state !== "cold") return state
   await loadVocab()
   setState("loading")
+  const stored = await getWeights()
+  if (stored) {
+    try {
+      session = await ort.InferenceSession.create(new Uint8Array(stored.bytes), sessionOpts)
+      source = "stored"
+      setState("ready")
+      return state
+    } catch {
+      session = null
+    }
+  }
   if (!(await weightsExist())) {
     setState("mock")
     return state
   }
   try {
-    session = await ort.InferenceSession.create("/models/dragon-stt.onnx", {
-      executionProviders: ["wasm"],
-      graphOptimizationLevel: "all",
-    })
+    session = await ort.InferenceSession.create("/models/dragon-stt.onnx", sessionOpts)
+    source = "bundled"
     setState("ready")
   } catch {
     setState("mock")
@@ -70,6 +98,13 @@ export async function loadEngine(): Promise<engineState> {
 }
 
 async function loadVocab(): Promise<void> {
+  const storedChars = await getStoredVocab()
+  if (storedChars) {
+    vocab.length = 0
+    vocab.push(...storedChars)
+    modelCard.vocabSize = storedChars.length
+    return
+  }
   try {
     const res = await fetch("/models/vocab.json")
     if (!res.ok) return
