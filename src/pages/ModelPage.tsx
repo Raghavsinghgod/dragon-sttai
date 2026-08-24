@@ -8,6 +8,7 @@ import { Shell } from "@/components/shell"
 import { Bench } from "@/components/bench"
 import { getEngineState, getEngineSource, modelCard, onEngineState, resetEngine, warmup } from "@/stt/engine"
 import { clearModel, getWeights, parseVocab, saveVocab, saveWeights, type storedWeights } from "@/lib/modelStore"
+import { installWeightsFromUrl } from "@/lib/weightsFetch"
 
 const stateLabel: Record<string, string> = {
   cold: "cold",
@@ -20,16 +21,6 @@ const sourceLabel: Record<string, string> = {
   stored: "installed weights",
   bundled: "bundled /models/dragon-stt.onnx",
   mock: "mock decode",
-}
-
-function joinBytes(parts: Uint8Array[], total: number): ArrayBuffer {
-  const out = new Uint8Array(total)
-  let off = 0
-  for (const p of parts) {
-    out.set(p, off)
-    off += p.length
-  }
-  return out.buffer
 }
 
 export default function ModelPage() {
@@ -62,27 +53,8 @@ export default function ModelPage() {
     setBusy(true)
     setPct(null)
     try {
-      const res = await fetch(target)
-      if (!res.ok) throw new Error("bad status")
-      const total = Number(res.headers.get("content-length")) || 0
-      let bytes: ArrayBuffer
-      if (res.body && total > 0) {
-        const reader = res.body.getReader()
-        const parts: Uint8Array[] = []
-        let received = 0
-        for (;;) {
-          const { done, value } = await reader.read()
-          if (done) break
-          parts.push(value)
-          received += value.length
-          setPct(Math.round((received / total) * 100))
-        }
-        bytes = joinBytes(parts, received)
-      } else {
-        bytes = await res.arrayBuffer()
-      }
-      await installBytes(bytes, target)
-      toast.success(`installed ${(bytes.byteLength / 1048576).toFixed(1)} mb · engine reloads on next run`)
+      const size = await installWeightsFromUrl(target, setPct)
+      toast.success(`installed ${(size / 1048576).toFixed(1)} mb · engine reloads on next run`)
     } catch {
       toast.error("download failed · check url and cors headers")
     } finally {

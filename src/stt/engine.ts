@@ -84,7 +84,8 @@ export async function loadEngine(): Promise<engineState> {
       rawMode = session.inputNames[0] === "input_values"
       setState("ready")
       return state
-    } catch {
+    } catch (e) {
+      console.warn("dragon stt: installed weights failed to load", e)
       session = null
     }
   }
@@ -97,7 +98,8 @@ export async function loadEngine(): Promise<engineState> {
     source = "bundled"
     rawMode = session.inputNames[0] === "input_values"
     setState("ready")
-  } catch {
+  } catch (e) {
+    console.warn("dragon stt: bundled weights failed to load", e)
     setState("mock")
   }
   return state

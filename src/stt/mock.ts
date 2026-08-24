@@ -44,12 +44,17 @@ export function mockWord(feats: Float32Array, start: number, end: number): strin
   return mockWords[h % mockWords.length]
 }
 
+export function energyThreshold(e: Float32Array): number {
+  if (!e.length) return 0
+  const sorted = Float32Array.from(e).sort()
+  const p85 = sorted[Math.floor(0.85 * (sorted.length - 1))]
+  return p85 * 0.5
+}
+
 export function mockDecode(feats: Float32Array, nFrames: number): string {
   const e = frameEnergies(feats, nFrames)
-  let maxE = 0
-  for (let t = 0; t < nFrames; t++) if (e[t] > maxE) maxE = e[t]
   const words: string[] = []
-  for (const [start, end] of voicedRuns(e, maxE * 0.45)) {
+  for (const [start, end] of voicedRuns(e, energyThreshold(e))) {
     if (end - start >= 4) words.push(mockWord(feats, start, end))
   }
   return words.join(" ")

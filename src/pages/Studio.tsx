@@ -8,10 +8,11 @@ import { Kbd } from "@/components/ui/kbd"
 import { Waveform } from "@/components/waveform"
 import { Shell } from "@/components/shell"
 import { blobToPcm } from "@/stt/audio"
-import { transcribe } from "@/stt/engine"
+import { getEngineState, onEngineState, transcribe } from "@/stt/engine"
 import { addEntry } from "@/lib/db"
 import { getProfile, setProfile } from "@/lib/profile"
 import { recordKeyUse } from "@/lib/keys"
+import { installWeightsFromUrl, remoteWeightsUrl } from "@/lib/weightsFetch"
 
 const stages = ["decoding audio", "extracting features", "running dragon stt", "done"]
 
@@ -24,11 +25,27 @@ export default function Studio() {
   const [result, setResult] = useState<{ text: string; modelVer: string; duration: number } | null>(null)
   const [busy, setBusy] = useState(false)
   const [profileName, setProfileName] = useState(getProfile())
+  const [engineState, setEngineState] = useState(getEngineState())
+  const [fetchPct, setFetchPct] = useState<number | null>(null)
 
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const audioCtxRef = useRef<AudioContext | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => onEngineState(setEngineState), [])
+
+  async function fetchWeights() {
+    setFetchPct(0)
+    try {
+      await installWeightsFromUrl(remoteWeightsUrl, setFetchPct)
+      toast.success("real weights installed · transcribe again")
+    } catch {
+      toast.error("fetch failed · check connection")
+    } finally {
+      setFetchPct(null)
+    }
+  }
 
   const loadBlob = useCallback(async (blob: Blob) => {
     setBusy(true)
@@ -231,6 +248,32 @@ export default function Studio() {
           </div>
         </CardContent>
       </Card>
+
+      {engineState === "mock" && (
+        <Card className="mt-6 border-primary/40">
+          <CardContent className="pt-6 space-y-3">
+            <p className="text-sm">
+              real weights are not loaded on this device — transcription ran on the mock decoder.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button onClick={fetchWeights} disabled={fetchPct !== null} className="gap-2">
+                {fetchPct !== null ? `fetching ${fetchPct}%` : "fetch real weights once · 91 mb"}
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                streams once from huggingface into local indexeddb, then runs offline forever
+              </span>
+            </div>
+            {fetchPct !== null && (
+              <div className="h-1 overflow-hidden rounded-full bg-border">
+                <div
+                  className="h-full bg-primary transition-all duration-200"
+                  style={{ width: `${fetchPct}%` }}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {result && (
         <Card className="mt-6 border-border/60">

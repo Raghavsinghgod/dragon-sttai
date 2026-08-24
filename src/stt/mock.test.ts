@@ -62,8 +62,13 @@ describe("mockDecode", () => {
   })
 
   it("drops bursts shorter than four frames", () => {
-    const levels = [...Array(3).fill(10), ...Array(17).fill(1)]
+    const levels = [...Array(3).fill(10), ...Array(17).fill(0)]
     expect(mockDecode(featsFrom(levels), levels.length)).toBe("")
+  })
+
+  it("keeps quiet speech voiced beside loud transients", () => {
+    const levels = [...Array(2).fill(50), ...Array(20).fill(4), ...Array(2).fill(60), ...Array(16).fill(4)]
+    expect(mockDecode(featsFrom(levels), levels.length)).not.toBe("")
   })
 
   it("emits one word per sustained burst", () => {
