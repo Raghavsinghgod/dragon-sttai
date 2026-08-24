@@ -137,6 +137,7 @@ export default function Dashboard() {
   const [revealed, setRevealed] = useState<apiKey | null>(null)
   const [liveId, setLiveId] = useState<string | null>(null)
   const [scope, setScope] = useState("live")
+  const [chartDays, setChartDays] = useState(7)
 
   useEffect(() => {
     listEntries()
@@ -271,6 +272,21 @@ export default function Dashboard() {
               usage
             </CardTitle>
             <div className="flex items-center gap-2">
+              <div className="flex overflow-hidden rounded-md border border-border/60">
+                {[7, 30].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setChartDays(d)}
+                    className={`px-2 py-1 font-mono text-xs transition-colors ${
+                      chartDays === d
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {d}d
+                  </button>
+                ))}
+              </div>
               <span className="font-mono text-xs text-muted-foreground">{scopeRuns.length} runs</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -307,9 +323,9 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">{emptyText}</p>
             ) : (
               <>
-                <Sparkbars counts={dailyCounts(scopeRuns, 14)} />
+                <Sparkbars counts={dailyCounts(scopeRuns, chartDays)} />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
-                  <span>{fmtDay(Date.now() - 13 * dayMs)}</span>
+                  <span>{fmtDay(Date.now() - (chartDays - 1) * dayMs)}</span>
                   <span>today</span>
                 </div>
               </>
