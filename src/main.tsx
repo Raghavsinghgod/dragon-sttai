@@ -8,26 +8,22 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 
-// Lazy load route components for better code splitting
-const Landing = lazy(() => import("./pages/Landing.tsx"));
-const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
-const Docs = lazy(() => import("./pages/Docs.tsx"));
-const Studio = lazy(() => import("./pages/Studio.tsx"));
-const HistoryPage = lazy(() => import("./pages/HistoryPage.tsx"));
-const ModelPage = lazy(() => import("./pages/ModelPage.tsx"));
-const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Landing = lazy(() => import("./pages/landing.tsx"));
+const Dashboard = lazy(() => import("./pages/dashboard.tsx"));
+const Docs = lazy(() => import("./pages/docs.tsx"));
+const Studio = lazy(() => import("./pages/studio.tsx"));
+const HistoryPage = lazy(() => import("./pages/history.tsx"));
+const ModelPage = lazy(() => import("./pages/model.tsx"));
+const NotFound = lazy(() => import("./pages/notfound.tsx"));
 
-// Simple loading fallback for route transitions
 function RouteLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="animate-pulse text-muted-foreground">loading...</div>
     </div>
   );
 }
 
-/** Silent error boundary — if VlyToolbar crashes it renders nothing instead of
- *  crashing the whole app (e.g. hook errors in WebContainer environment). */
 class ToolbarErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -44,7 +40,6 @@ class ToolbarErrorBoundary extends React.Component<
   }
 }
 
-/** Hard guard so runtime errors never leave the preview as a blank page. */
 class RootErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; message: string; stack: string }
@@ -53,7 +48,7 @@ class RootErrorBoundary extends React.Component<
   static getDerivedStateFromError(error: Error) {
     return {
       hasError: true,
-      message: error.message || "Unknown runtime error",
+      message: error.message || "unknown runtime error",
       stack: error.stack || "",
     };
   }
@@ -65,7 +60,7 @@ class RootErrorBoundary extends React.Component<
       return (
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
           <div className="max-w-lg text-center">
-            <p className="text-sm font-semibold">Preview runtime error</p>
+            <p className="text-sm font-semibold">preview runtime error</p>
             <p className="mt-2 text-xs text-muted-foreground break-words">
               {this.state.message}
             </p>
@@ -83,8 +78,6 @@ class RootErrorBoundary extends React.Component<
 }
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
-
-
 
 function RouteSyncer() {
   const location = useLocation();
@@ -108,7 +101,6 @@ function RouteSyncer() {
 
   return null;
 }
-
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
