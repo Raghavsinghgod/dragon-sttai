@@ -1,13 +1,18 @@
-export async function blobToPcm(blob: Blob): Promise<{ pcm: Float32Array; duration: number }> {
+export async function blobToPcm(
+  blob: Blob,
+  makeCtx: () => AudioContext = () => new AudioContext(),
+  Ctx?: typeof OfflineAudioContext,
+): Promise<{ pcm: Float32Array; duration: number }> {
   const buf = await blob.arrayBuffer()
-  const ctx = new AudioContext()
+  const ctx = makeCtx()
   const decoded = await ctx.decodeAudioData(buf.slice(0))
   await ctx.close()
-  return resampleToMono(decoded)
+  return resampleToMono(decoded, Ctx)
 }
 
-async function resampleToMono(
+export async function resampleToMono(
   buffer: AudioBuffer,
+  Ctx: typeof OfflineAudioContext = globalThis.OfflineAudioContext,
 ): Promise<{ pcm: Float32Array; duration: number }> {
   const target = 16000
   const channels = buffer.numberOfChannels
@@ -20,7 +25,7 @@ async function resampleToMono(
   if (buffer.sampleRate === target && channels === 1) {
     return { pcm: mono.slice(0, buffer.length), duration: buffer.duration }
   }
-  const offline = new OfflineAudioContext(1, Math.ceil(buffer.duration * target), target)
+  const offline = new Ctx(1, Math.ceil(buffer.duration * target), target)
   const src = offline.createBufferSource()
   const merged = offline.createBuffer(1, monoLen, buffer.sampleRate)
   merged.copyToChannel(mono, 0)

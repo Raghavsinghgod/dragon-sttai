@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">96% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/24</span>
+                <span class='fraction'>24/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">95.83% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/23</span>
+                <span class='fraction'>23/24</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -95,69 +95,84 @@
 <a name='L30'></a><a href='#L30'>30</a>
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export async function <span class="fstat-no" title="function not covered" >blobToPcm(b</span>lob: Blob): Promise&lt;{ pcm: Float32Array; duration: number }&gt; {
-  const buf = <span class="cstat-no" title="statement not covered" >await blob.arrayBuffer()</span>
-  const ctx = <span class="cstat-no" title="statement not covered" >new AudioContext()</span>
-  const decoded = <span class="cstat-no" title="statement not covered" >await ctx.decodeAudioData(buf.slice(0))</span>
-<span class="cstat-no" title="statement not covered" >  await ctx.close()</span>
-<span class="cstat-no" title="statement not covered" >  return resampleToMono(decoded)</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export async function blobToPcm(
+  blob: Blob,
+  makeCtx: () =&gt; AudioContext = <span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >n</span>ew AudioContext(),</span></span>
+  Ctx?: typeof OfflineAudioContext,
+): Promise&lt;{ pcm: Float32Array; duration: number }&gt; {
+  const buf = await blob.arrayBuffer()
+  const ctx = makeCtx()
+  const decoded = await ctx.decodeAudioData(buf.slice(0))
+  await ctx.close()
+  return resampleToMono(decoded, Ctx)
 }
 &nbsp;
-async function <span class="fstat-no" title="function not covered" >resampleToMono(</span>
+export async function resampleToMono(
   buffer: AudioBuffer,
+  Ctx: typeof OfflineAudioContext = globalThis.OfflineAudioContext,
 ): Promise&lt;{ pcm: Float32Array; duration: number }&gt; {
-  const target = <span class="cstat-no" title="statement not covered" >16000</span>
-  const channels = <span class="cstat-no" title="statement not covered" >buffer.numberOfChannels</span>
-  const monoLen = <span class="cstat-no" title="statement not covered" >buffer.length * channels</span>
-  const mono = <span class="cstat-no" title="statement not covered" >new Float32Array(monoLen)</span>
-<span class="cstat-no" title="statement not covered" >  for (let c = <span class="cstat-no" title="statement not covered" >0; c</span> &lt; channels; c++) {</span>
-    const data = <span class="cstat-no" title="statement not covered" >buffer.getChannelData(c)</span>
-<span class="cstat-no" title="statement not covered" >    mono.set(data, c * buffer.length)</span>
+  const target = 16000
+  const channels = buffer.numberOfChannels
+  const monoLen = buffer.length * channels
+  const mono = new Float32Array(monoLen)
+  for (let c = 0; c &lt; channels; c++) {
+    const data = buffer.getChannelData(c)
+    mono.set(data, c * buffer.length)
   }
-<span class="cstat-no" title="statement not covered" >  if (buffer.sampleRate === target &amp;&amp; channels === 1) {</span>
-<span class="cstat-no" title="statement not covered" >    return { pcm: mono.slice(0, buffer.length), duration: buffer.duration }</span>
+  if (buffer.sampleRate === target &amp;&amp; channels === 1) {
+    return { pcm: mono.slice(0, buffer.length), duration: buffer.duration }
   }
-  const offline = <span class="cstat-no" title="statement not covered" >new OfflineAudioContext(1, Math.ceil(buffer.duration * target), target)</span>
-  const src = <span class="cstat-no" title="statement not covered" >offline.createBufferSource()</span>
-  const merged = <span class="cstat-no" title="statement not covered" >offline.createBuffer(1, monoLen, buffer.sampleRate)</span>
-<span class="cstat-no" title="statement not covered" >  merged.copyToChannel(mono, 0)</span>
-<span class="cstat-no" title="statement not covered" >  src.buffer = merged</span>
-<span class="cstat-no" title="statement not covered" >  src.connect(offline.destination)</span>
-<span class="cstat-no" title="statement not covered" >  src.start()</span>
-  const rendered = <span class="cstat-no" title="statement not covered" >await offline.startRendering()</span>
-<span class="cstat-no" title="statement not covered" >  return { pcm: rendered.getChannelData(0).slice(), duration: rendered.duration }</span>
+  const offline = new Ctx(1, Math.ceil(buffer.duration * target), target)
+  const src = offline.createBufferSource()
+  const merged = offline.createBuffer(1, monoLen, buffer.sampleRate)
+  merged.copyToChannel(mono, 0)
+  src.buffer = merged
+  src.connect(offline.destination)
+  src.start()
+  const rendered = await offline.startRendering()
+  return { pcm: rendered.getChannelData(0).slice(), duration: rendered.duration }
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -166,7 +181,7 @@ async function <span class="fstat-no" title="function not covered" >resampleToMo
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-24T15:26:43.371Z
+                at 2026-08-24T15:34:59.581Z
             </div>
         <script src="../prettify.js"></script>
         <script>
