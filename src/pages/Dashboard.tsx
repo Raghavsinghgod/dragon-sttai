@@ -110,19 +110,27 @@ function Sparkbars({ counts }: { counts: number[] }) {
       aria-label="transcriptions per day"
     >
       {counts.map((c, i) => {
-        const h = c === 0 ? 3 : Math.max(5, Math.round((c / max) * 41))
+        const h = c === 0 ? 3 : Math.max(6, Math.round((c / max) * 32))
+        const peak = c > 0 && c === max
+        const x = i * 12 + 1
         return (
-          <rect
-            key={i}
-            x={i * 12 + 1}
-            y={44 - h}
-            width={8}
-            height={h}
-            rx={1.5}
-            className={c === 0 ? "fill-muted" : "fill-primary"}
-          >
-            <title>{`${c} runs`}</title>
-          </rect>
+          <g key={i}>
+            <rect
+              x={x}
+              y={44 - h}
+              width={8}
+              height={h}
+              rx={1.5}
+              className={c === 0 ? "fill-muted" : peak ? "fill-primary" : "fill-primary/60"}
+            >
+              <title>{`${peak ? "peak · " : ""}${c} runs`}</title>
+            </rect>
+            {peak && (
+              <circle cx={x + 4} cy={44 - h - 4} r={2} className="fill-primary">
+                <title>{`peak · ${c} runs`}</title>
+              </circle>
+            )}
+          </g>
         )
       })}
     </svg>
