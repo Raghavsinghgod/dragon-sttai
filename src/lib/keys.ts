@@ -87,7 +87,9 @@ export function setActiveKey(id: string | null): void {
   try {
     if (id === null) localStorage.removeItem(activeStorageKey)
     else localStorage.setItem(activeStorageKey, id)
-  } catch {}
+  } catch {
+    return
+  }
 }
 
 export function recordKeyUse(): void {

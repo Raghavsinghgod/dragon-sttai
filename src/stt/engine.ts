@@ -77,7 +77,9 @@ async function loadVocab(): Promise<void> {
     vocab.length = 0
     vocab.push(...chars)
     modelCard.vocabSize = chars.length
-  } catch {}
+  } catch {
+    return
+  }
 }
 
 const featureChunk = 500

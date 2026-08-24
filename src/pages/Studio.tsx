@@ -1,9 +1,10 @@
-import { useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Mic, Play } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Kbd } from "@/components/ui/kbd"
 import { Waveform } from "@/components/waveform"
 import { Shell } from "@/components/shell"
 import { blobToPcm } from "@/stt/audio"
@@ -29,7 +30,23 @@ export default function Studio() {
   const audioCtxRef = useRef<AudioContext | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  async function startRecording() {
+  const loadBlob = useCallback(async (blob: Blob) => {
+    setBusy(true)
+    setStage("decoding audio")
+    try {
+      const { pcm: data, duration } = await blobToPcm(blob)
+      setPcm(data)
+      setStage("idle")
+      if (duration < 0.3) toast.error("audio too short")
+    } catch {
+      toast.error("could not decode audio")
+      setStage("error")
+    } finally {
+      setBusy(false)
+    }
+  }, [])
+
+  const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const ctx = new AudioContext()
@@ -60,42 +77,27 @@ export default function Studio() {
     } catch {
       toast.error("microphone unavailable")
     }
-  }
+  }, [loadBlob])
 
-  function stopRecording() {
+  const stopRecording = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = null
     recorderRef.current?.stop()
     recorderRef.current = null
     setRecording(false)
     setStage("decoding audio")
-  }
+  }, [])
 
-  async function loadBlob(blob: Blob) {
-    setBusy(true)
-    setStage("decoding audio")
-    try {
-      const { pcm: data, duration } = await blobToPcm(blob)
-      setPcm(data)
-      setStage("idle")
-      if (duration < 0.3) toast.error("audio too short")
-    } catch {
-      toast.error("could not decode audio")
-      setStage("error")
-    } finally {
-      setBusy(false)
-    }
-  }
 
-  async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  const onUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setResult(null)
     await loadBlob(file)
     e.target.value = ""
-  }
+  }, [loadBlob])
 
-  async function runTranscribe() {
+  const runTranscribe = useCallback(async () => {
     if (!pcm || busy) return
     setBusy(true)
     setResult(null)
@@ -116,7 +118,7 @@ export default function Studio() {
     } finally {
       setBusy(false)
     }
-  }
+  }, [pcm, busy])
 
   function copyText(text: string) {
     navigator.clipboard.writeText(text).then(
@@ -139,6 +141,25 @@ export default function Studio() {
   function fmt(s: number): string {
     return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
   }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA") return
+      const key = e.key.toLowerCase()
+      if (key === "r") {
+        e.preventDefault()
+        if (recording) stopRecording()
+        else if (!busy) void startRecording()
+      } else if (key === "t" && pcm && !busy && !recording) {
+        e.preventDefault()
+        void runTranscribe()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [recording, busy, pcm, startRecording, stopRecording, runTranscribe])
 
   return (
     <Shell>
@@ -167,11 +188,13 @@ export default function Studio() {
                   <span className="relative inline-flex size-2 rounded-full bg-white" />
                 </span>
                 stop ({fmt(elapsed)})
+                <Kbd className="border border-white/30 bg-white/10 text-white">r</Kbd>
               </Button>
             ) : (
               <Button onClick={startRecording} disabled={busy} className="gap-2">
                 <Mic className="size-4" />
                 record
+                <Kbd className="border border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground">r</Kbd>
               </Button>
             )}
             <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
@@ -181,6 +204,7 @@ export default function Studio() {
             <Button onClick={runTranscribe} disabled={!pcm || busy || recording} className="gap-2">
               <Play className="size-4" />
               transcribe
+              <Kbd className="border border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground">t</Kbd>
             </Button>
           </div>
           <div className="text-xs font-mono">

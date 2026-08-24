@@ -139,20 +139,22 @@ function Sparkbars({ counts }: { counts: number[] }) {
 
 export default function Dashboard() {
   const [entries, setEntries] = useState<historyEntry[] | null>(null)
-  const [keys, setKeys] = useState<apiKey[] | null>(null)
+  const [keys, setKeys] = useState<apiKey[] | null>(() => listKeys())
   const [createOpen, setCreateOpen] = useState(false)
   const [newName, setNewName] = useState("")
   const [revealed, setRevealed] = useState<apiKey | null>(null)
-  const [liveId, setLiveId] = useState<string | null>(null)
+  const [liveId, setLiveId] = useState<string | null>(() => getActiveKeyId())
   const [scope, setScope] = useState("live")
   const [chartDays, setChartDays] = useState(7)
+  const [loadedAt, setLoadedAt] = useState(0)
 
   useEffect(() => {
     listEntries()
-      .then(setEntries)
+      .then((all) => {
+        setEntries(all)
+        setLoadedAt(Date.now())
+      })
       .catch(() => toast.error("could not load usage"))
-    setKeys(listKeys())
-    setLiveId(getActiveKeyId())
   }, [])
 
   const loaded = entries !== null && keys !== null
@@ -333,7 +335,7 @@ export default function Dashboard() {
               <>
                 <Sparkbars counts={dailyCounts(scopeRuns, chartDays)} />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
-                  <span>{fmtDay(Date.now() - (chartDays - 1) * dayMs)}</span>
+                  <span>{fmtDay(loadedAt - (chartDays - 1) * dayMs)}</span>
                   <span>today</span>
                 </div>
               </>
