@@ -40,18 +40,20 @@ api key
 
 full guide lives at /docs on the dragon stt site.`
 
-const modelsReadme = `dragon-stt.onnx goes here: int8, input inputs [1,T,80] float32,
-output logits [1,T,V]. target under 15 mb.
+const modelsReadme = `the bundled dragon-stt.onnx ships real wav2vec2-base
+weights (librispeech, apache-2.0): raw waveform in — input input_values
+[1,T] float32 at 16 khz z-score normalized per clip, output logits
+[1,T,V], blank = index 0. copy it together with vocab.json.
 
-vocab.json ships as the default char set plus a trailing blank token.
-replace it with the file produced by your export step so ids match
-the trained weights.`
+custom exports from training/export_onnx.py use log-mel features:
+input inputs [1,T,80] float32, output logits [1,T,V]. keep vocab.json
+blank-first (index 0 = "") so ids match what ctcGreedy drops.`
 
 function collectFiles(): filePair[] {
   const files: filePair[] = Object.entries(sttSources)
     .map(([k, v]) => ["src/" + k.replace(/^(?:\.\.\/)+/, ""), v] as filePair)
     .sort((a, b) => a[0].localeCompare(b[0]))
-  files.push(["public/models/vocab.json", JSON.stringify([...vocab, ""], null, 2)])
+  files.push(["public/models/vocab.json", JSON.stringify(["", ...vocab.slice(1)], null, 2)])
   files.push(["public/models/readme.txt", modelsReadme])
   files.push(["readme.txt", starterReadme])
   return files

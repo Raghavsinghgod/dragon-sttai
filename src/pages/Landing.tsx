@@ -128,7 +128,7 @@ export default function Landing() {
             </Button>
           </div>
           <div className="mt-6 flex flex-wrap justify-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            {["int8 quantized", "1.8m params", "4.2 mb weights", "0 network calls"].map((chip) => (
+            {["int8 quantized", "95m params", "91 mb bundled", "0 inference calls"].map((chip) => (
               <span key={chip} className="rounded-full border border-border/60 px-3 py-1">
                 {chip}
               </span>

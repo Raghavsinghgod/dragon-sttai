@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { blobToPcm, resampleToMono } from "./audio"
+import { blobToPcm, normalizePcm, resampleToMono } from "./audio"
 
 const TARGET = 16000
 
@@ -162,5 +162,36 @@ describe("blobToPcm", () => {
     expect(allClose(pcm, 0.25)).toBe(true)
     expect(duration).toBeCloseTo(0.5, 9)
     expect(closed).toBe(true)
+  })
+})
+
+describe("normalizePcm", () => {
+  it("centers mean and scales to unit variance", () => {
+    const pcm = new Float32Array([1, 2, 3, 4, 5])
+    const out = normalizePcm(pcm)
+    let mean = 0
+    for (const v of out) mean += v
+    mean /= out.length
+    let varSum = 0
+    for (const v of out) varSum += (v - mean) * (v - mean)
+    expect(mean).toBeCloseTo(0, 9)
+    expect(Math.sqrt(varSum / out.length)).toBeCloseTo(1, 6)
+  })
+
+  it("maps constant input to zeros instead of dividing by zero", () => {
+    const out = normalizePcm(new Float32Array(8).fill(0.7))
+    expect([...out].every((v) => v === 0)).toBe(true)
+  })
+
+  it("returns an empty buffer for empty input", () => {
+    expect(normalizePcm(new Float32Array(0))).toHaveLength(0)
+  })
+
+  it("preserves length and sign structure of the waveform", () => {
+    const pcm = new Float32Array([-2, -1, 1, 2])
+    const out = normalizePcm(pcm)
+    expect(out).toHaveLength(4)
+    expect(out[0]).toBeLessThan(0)
+    expect(out[3]).toBeGreaterThan(0)
   })
 })

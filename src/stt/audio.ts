@@ -35,3 +35,19 @@ export async function resampleToMono(
   const rendered = await offline.startRendering()
   return { pcm: rendered.getChannelData(0).slice(), duration: rendered.duration }
 }
+
+export function normalizePcm(pcm: Float32Array): Float32Array {
+  const out = new Float32Array(pcm.length)
+  if (!pcm.length) return out
+  let sum = 0
+  for (let i = 0; i < pcm.length; i++) sum += pcm[i]
+  const mean = sum / pcm.length
+  let varSum = 0
+  for (let i = 0; i < pcm.length; i++) {
+    const d = pcm[i] - mean
+    varSum += d * d
+  }
+  const std = Math.sqrt(varSum / pcm.length) || 1
+  for (let i = 0; i < pcm.length; i++) out[i] = (pcm[i] - mean) / std
+  return out
+}

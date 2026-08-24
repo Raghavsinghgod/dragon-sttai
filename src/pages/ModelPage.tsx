@@ -147,6 +147,7 @@ export default function ModelPage() {
     ["params", modelCard.params],
     ["size", `${modelCard.sizeMb} mb`],
     ["quantization", modelCard.quant],
+    ["base weights", modelCard.base],
     ["vocab size", String(modelCard.vocabSize)],
     ["runtime", "onnxruntime-web wasm · 1 thread"],
   ]
@@ -197,10 +198,10 @@ export default function ModelPage() {
             {warming ? "warming..." : "warmup"}
           </Button>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            by default the engine reads bundled weights at /models/dragon-stt.onnx and falls back to a
-            deterministic local mock decoder over the same log-mel pipeline until they exist. installing
-            external weights below fetches them once into local indexeddb; every transcription still runs
-            entirely on this device.
+            real weights are bundled at /models/dragon-stt.onnx — wav2vec2-base fine-tuned on librispeech,
+            int8 quantized, greedy ctc decode over a 32-char vocab. the first transcription loads them from
+            same origin (~91 mb), after that everything runs offline on this device. installing external
+            weights below swaps them once into local indexeddb; nothing is ever sent anywhere.
           </p>
         </CardContent>
       </Card>
