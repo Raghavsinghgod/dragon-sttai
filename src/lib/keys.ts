@@ -4,16 +4,27 @@ export type apiKey = {
   secret: string
   createdAt: number
   revoked: boolean
+  uses: number
+  lastUsedAt: number | null
 }
 
 const storageKey = "dragon-stt-keys"
+const activeStorageKey = "dragon-stt-active-key"
+
+function normalize(raw: apiKey): apiKey {
+  return {
+    ...raw,
+    uses: typeof raw.uses === "number" ? raw.uses : 0,
+    lastUsedAt: raw.lastUsedAt ?? null,
+  }
+}
 
 function readKeys(): apiKey[] {
   try {
     const raw = localStorage.getItem(storageKey)
     if (!raw) return []
     const parsed = JSON.parse(raw) as apiKey[]
-    return Array.isArray(parsed) ? parsed : []
+    return Array.isArray(parsed) ? parsed.map(normalize) : []
   } catch {
     return []
   }
@@ -40,6 +51,8 @@ export function createKey(name: string): apiKey {
     secret: `dragon_live_${randomHex(16)}`,
     createdAt: Date.now(),
     revoked: false,
+    uses: 0,
+    lastUsedAt: null,
   }
   writeKeys([key, ...readKeys()])
   return key
@@ -55,4 +68,31 @@ export function deleteKey(id: string): void {
 
 export function maskSecret(secret: string): string {
   return `${secret.slice(0, 17)}…${secret.slice(-4)}`
+}
+
+export function getActiveKeyId(): string | null {
+  try {
+    const id = localStorage.getItem(activeStorageKey)
+    if (!id) return null
+    return readKeys().some((k) => k.id === id && !k.revoked) ? id : null
+  } catch {
+    return null
+  }
+}
+
+export function setActiveKey(id: string | null): void {
+  try {
+    if (id === null) localStorage.removeItem(activeStorageKey)
+    else localStorage.setItem(activeStorageKey, id)
+  } catch {}
+}
+
+export function recordKeyUse(): void {
+  const id = getActiveKeyId()
+  if (!id) return
+  writeKeys(
+    readKeys().map((k) =>
+      k.id === id ? { ...k, uses: k.uses + 1, lastUsedAt: Date.now() } : k,
+    ),
+  )
 }

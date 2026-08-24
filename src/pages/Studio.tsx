@@ -9,6 +9,7 @@ import { blobToPcm } from "@/stt/audio"
 import { transcribe } from "@/stt/engine"
 import { addEntry } from "@/lib/db"
 import { getProfile, setProfile } from "@/lib/profile"
+import { recordKeyUse } from "@/lib/keys"
 
 const stages = ["decoding audio", "extracting features", "running dragon stt", "done"]
 
@@ -106,6 +107,7 @@ export default function Studio() {
         createdAt: Date.now(),
         modelVer: out.modelVer,
       })
+      recordKeyUse()
       toast.success("saved to history")
     } catch {
       toast.error("transcription failed")

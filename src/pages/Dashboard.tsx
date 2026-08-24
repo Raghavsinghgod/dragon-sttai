@@ -5,6 +5,8 @@ import {
   Activity,
   ArrowRight,
   Ban,
+  Circle,
+  CircleDot,
   Copy,
   KeyRound,
   Plus,
@@ -33,8 +35,10 @@ import { getProfile } from "@/lib/profile"
 import {
   createKey,
   deleteKey,
+  getActiveKeyId,
   listKeys,
   maskSecret,
+  setActiveKey,
   setRevoked,
   type apiKey,
 } from "@/lib/keys"
@@ -59,12 +63,14 @@ export default function Dashboard() {
   const [createOpen, setCreateOpen] = useState(false)
   const [newName, setNewName] = useState("")
   const [revealed, setRevealed] = useState<apiKey | null>(null)
+  const [liveId, setLiveId] = useState<string | null>(null)
 
   useEffect(() => {
     listEntries()
       .then(setEntries)
       .catch(() => toast.error("could not load usage"))
     setKeys(listKeys())
+    setLiveId(getActiveKeyId())
   }, [])
 
   const loaded = entries !== null && keys !== null
@@ -95,7 +101,27 @@ export default function Dashboard() {
   function removeKey(id: string) {
     deleteKey(id)
     setKeys(listKeys())
+    if (liveId === id) {
+      setActiveKey(null)
+      setLiveId(null)
+    }
     toast.success("key deleted")
+  }
+
+  function toggleLive(key: apiKey) {
+    if (liveId !== key.id) {
+      if (key.revoked) {
+        toast.error("restore the key first")
+        return
+      }
+      setActiveKey(key.id)
+      setLiveId(key.id)
+      toast.success(`${key.name} is live`)
+    } else {
+      setActiveKey(null)
+      setLiveId(null)
+      toast.success("key unmarked")
+    }
   }
 
   return (
@@ -143,8 +169,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              one key per project that embeds the dragon runtime. keys are generated and stored in
-              this browser only — they never leave the device.
+              one key per project that embeds the dragon runtime. mark one as live and every studio
+              transcription ticks its counter. keys are generated and stored in this browser only —
+              they never leave the device.
             </p>
             {keys === null ? (
               <div className="mt-4 space-y-2">
@@ -161,6 +188,7 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium">{k.name}</p>
                       <p className="font-mono text-xs text-muted-foreground">{maskSecret(k.secret)}</p>
                     </div>
+                    <span className="font-mono text-xs text-muted-foreground">{k.uses} runs</span>
                     <span className="text-xs text-muted-foreground">{fmtDate(k.createdAt)}</span>
                     {k.revoked ? (
                       <Badge variant="outline" className="text-muted-foreground">revoked</Badge>
@@ -168,6 +196,18 @@ export default function Dashboard() {
                       <Badge className="border border-primary/30 bg-primary/15 text-primary">active</Badge>
                     )}
                     <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title={liveId === k.id ? "unmark live key" : "mark as live key"}
+                        onClick={() => toggleLive(k)}
+                      >
+                        {liveId === k.id ? (
+                          <CircleDot className="size-4 text-primary" />
+                        ) : (
+                          <Circle className="size-4" />
+                        )}
+                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"

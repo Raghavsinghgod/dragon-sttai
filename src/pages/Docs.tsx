@@ -299,8 +299,9 @@ export default function Docs() {
           <Link to="/dashboard" className="text-primary hover:underline">
             console
           </Link>{" "}
-          and paste it into your app config. keys are local identifiers for your builds — they are
-          generated, stored and checked entirely on-device, and they never leave the browser.
+          and paste it into your app config. mark a key as live and every studio transcription
+          ticks its run counter. keys are local identifiers for your builds — they are generated,
+          stored and checked entirely on-device, and they never leave the browser.
         </p>
       </Section>
 
