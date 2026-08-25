@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Flame, Trash2 } from "lucide-react"
+import { Flame, Trash2 } from "@/icons"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Input } from "@/ui"
 import { Shell } from "@/components/shell"

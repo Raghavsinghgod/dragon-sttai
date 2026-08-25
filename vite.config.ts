@@ -5,7 +5,7 @@ import path from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react(), vlyPlugin(), tailwindcss()],
+  plugins: [vlyPlugin(), react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -17,26 +17,26 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router'],
+          "react-vendor": ["react", "react-dom", "react-router"],
+          "onnx-vendor": ["onnxruntime-web"],
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash].[ext]",
       },
     },
     chunkSizeWarningLimit: 1000,
-    target: 'esnext',
-    minify: 'esbuild',
+    target: "esnext",
+    minify: "esbuild",
   },
   optimizeDeps: {
-    entries: ['index.html'],
+    entries: ["index.html"],
     include: [
-      'react',
-      'react/jsx-runtime',
-      'react-dom',
-      'react-dom/client',
-      'react-router',
-      '@vly-ai/integrations',
+      "react",
+      "react/jsx-runtime",
+      "react-dom",
+      "react-dom/client",
+      "react-router",
     ],
   },
   server: {

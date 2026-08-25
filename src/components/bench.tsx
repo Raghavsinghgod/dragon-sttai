@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { Copy, Play, Square, Upload } from "lucide-react"
+import { Copy, Play, Square, Upload } from "@/icons"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Input } from "@/ui"
 import { blobToPcm, transcribe, cer, wer } from "@/stt/engine"

@@ -1,5 +1,5 @@
 import { toast } from "sonner"
-import { Copy, Download } from "lucide-react"
+import { Copy, Download } from "@/icons"
 import { Link } from "react-router"
 import { Button } from "@/ui"
 import { Shell } from "@/components/shell"

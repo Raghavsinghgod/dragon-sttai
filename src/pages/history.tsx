@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FileAudio } from "lucide-react"
+import { FileAudio } from "@/icons"
 import { Link } from "react-router"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Skeleton } from "@/ui"

@@ -16,7 +16,7 @@ import {
   Timer,
   Trash2,
   TrendingUp,
-} from "lucide-react"
+} from "@/icons"
 import { Link } from "react-router"
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Input, Skeleton } from "@/ui"
 import { Shell } from "@/components/shell"

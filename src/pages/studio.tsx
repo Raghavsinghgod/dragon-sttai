@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Mic, Play } from "lucide-react"
+import { Mic, Play } from "@/icons"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Input, Kbd } from "@/ui"
 import { Waveform } from "@/components/waveform"
