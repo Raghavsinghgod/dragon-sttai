@@ -1,5 +1,5 @@
 import '@vly-ai/integrations';
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/ui";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";

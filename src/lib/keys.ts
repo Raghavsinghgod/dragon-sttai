@@ -1,3 +1,5 @@
+export const dayMs = 86400000
+
 export type apiKey = {
   id: string
   name: string
@@ -70,7 +72,7 @@ export function deleteKey(id: string): void {
 }
 
 export function maskSecret(secret: string): string {
-  return `${secret.slice(0, 17)}…${secret.slice(-4)}`
+  return `${secret.slice(0, 17)}...${secret.slice(-4)}`
 }
 
 export function getActiveKeyId(): string | null {
@@ -103,4 +105,18 @@ export function recordKeyUse(): void {
         : k,
     ),
   )
+}
+
+export function dailyCounts(timestamps: number[], days: number): number[] {
+  const counts = new Array<number>(days).fill(0)
+  const base = new Date()
+  base.setHours(0, 0, 0, 0)
+  for (const ts of timestamps) {
+    const that = new Date(ts)
+    that.setHours(0, 0, 0, 0)
+    const back = Math.round((base.getTime() - that.getTime()) / dayMs)
+    const idx = days - 1 - back
+    if (idx >= 0 && idx < days) counts[idx]++
+  }
+  return counts
 }

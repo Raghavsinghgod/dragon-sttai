@@ -1,12 +1,8 @@
 import { useRef, useState } from "react"
 import { Copy, Play, Square, Upload } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { blobToPcm } from "@/stt/audio"
-import { transcribe } from "@/stt/engine"
-import { cer, wer } from "@/stt/score"
+import { Button, Card, CardContent, Input } from "@/ui"
+import { blobToPcm, transcribe, cer, wer } from "@/stt/engine"
 
 type benchItem = {
   label: string

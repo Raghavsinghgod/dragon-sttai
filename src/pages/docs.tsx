@@ -1,17 +1,12 @@
 import { toast } from "sonner"
 import { Copy, Download } from "lucide-react"
 import { Link } from "react-router"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/ui"
 import { Shell } from "@/components/shell"
-import {
-  bundleText,
-  downloadBlob,
-  makeZip,
-  type filePair,
-} from "@/lib/bundle"
-import { vocab } from "@/stt/vocab"
+import { bundleText, downloadBlob, makeZip, type filePair } from "@/lib/db"
+import { vocab } from "@/stt/engine"
 
-const sttSources = import.meta.glob("../../stt/*.ts", {
+const sttSource = import.meta.glob("../stt/engine.ts", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -20,8 +15,8 @@ const sttSources = import.meta.glob("../../stt/*.ts", {
 const starterReadme = `dragon stt runtime starter
 
 contents
-  src/stt/         audio decode, log-mel features, ctc decode, engine, vocab
-  public/models/   vocab.json template + where weights go
+  src/stt/engine.ts   audio decode, log-mel features, ctc decode, inference
+  public/models/      vocab.json template + where weights go
 
 setup
   1. install onnxruntime-web in your host app
@@ -50,7 +45,7 @@ input inputs [1,T,80] float32, output logits [1,T,V]. keep vocab.json
 blank-first (index 0 = "") so ids match what ctcGreedy drops.`
 
 function collectFiles(): filePair[] {
-  const files: filePair[] = Object.entries(sttSources)
+  const files: filePair[] = Object.entries(sttSource)
     .map(([k, v]) => ["src/" + k.replace(/^(?:\.\.\/)+/, ""), v] as filePair)
     .sort((a, b) => a[0].localeCompare(b[0]))
   files.push(["public/models/vocab.json", JSON.stringify(["", ...vocab.slice(1)], null, 2)])
@@ -84,11 +79,7 @@ const toc = [
 
 const layoutTree = `your-app/
   src/stt/
-    audio.ts
-    decode.ts
     engine.ts
-    features.ts
-    vocab.ts
   public/
     ort/
       ort-wasm-simd-threaded.wasm
@@ -103,7 +94,7 @@ const configureSnippet = `import * as ort from "onnxruntime-web"
 ort.env.wasm.wasmPaths = "/ort/"
 ort.env.wasm.numThreads = 1`
 
-const audioSnippet = `import { blobToPcm } from "./stt/audio"
+const audioSnippet = `import { blobToPcm } from "./stt/engine"
 
 const { pcm, duration } = await blobToPcm(audioBlob)
 if (duration < 0.3) throw new Error("clip too short")`
@@ -114,7 +105,7 @@ await warmup()
 
 const { text, modelVer } = await transcribe(pcm, setStage)`
 
-const featuresSnippet = `import { frameCount, logMelFrame } from "./stt/features"
+const featuresSnippet = `import { frameCount, logMelFrame } from "./stt/engine"
 
 const frames = frameCount(pcm.length)
 const feats = new Float32Array(frames * 80)
@@ -197,7 +188,7 @@ export default function Docs() {
     <Shell>
       <h1 className="text-2xl font-semibold tracking-tight">docs</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        embed guide · ship dragon-stt inside your own app. five source modules, one package,
+        embed guide · ship dragon-stt inside your own app. one source module, one package,
         zero network at runtime.
       </p>
 
@@ -215,7 +206,7 @@ export default function Docs() {
 
       <Section id="layout" title="project layout">
         <p className="text-sm leading-relaxed text-muted-foreground">
-          copy the runtime sources and static assets into your app. everything is same-origin:
+          copy the runtime source and static assets into your app. everything is same-origin:
           wasm from <code className="font-mono">/ort</code>, weights from{" "}
           <code className="font-mono">/models</code>.
         </p>
@@ -231,7 +222,7 @@ export default function Docs() {
           </Button>
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          the zip bundles all five modules, a matching vocab.json template and setup readmes,
+          the zip bundles the engine source, a matching vocab.json template and setup readmes,
           built client-side at download time. ort wasm binaries stay binary — copy them from
           onnxruntime-web dist into your public/ort folder.
         </p>
@@ -277,7 +268,7 @@ export default function Docs() {
         </p>
         <CodeBlock code={featuresSnippet} />
         <p className="text-sm leading-relaxed text-muted-foreground">
-          if you retrain the weights yourself, mirror the packing in engine.ts runModel before
+          if you retrain the weights yourself, mirror the packing in engine.ts before
           calling <code className="font-mono">ctcGreedy</code> — padded logits must be compacted to
           vocab width first.
         </p>

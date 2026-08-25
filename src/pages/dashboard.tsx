@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-import { motion } from "framer-motion"
 import { toast } from "sonner"
 import {
   Activity,
@@ -19,30 +18,11 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { Link } from "react-router"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Input, Skeleton } from "@/ui"
 import { Shell } from "@/components/shell"
-import { dailyCounts, dayMs } from "@/lib/chart"
+import { dailyCounts, dayMs } from "@/lib/keys"
 import { listEntries, type historyEntry } from "@/lib/db"
-import { getProfile } from "@/lib/profile"
+import { getProfile } from "@/lib/db"
 import {
   createKey,
   deleteKey,
@@ -54,8 +34,7 @@ import {
   type apiKey,
 } from "@/lib/keys"
 
-const quickstart = `const { pcm } = await blobToPcm(recorded)
-const { text, modelVer } = await transcribe(pcm, (stage) => log(stage))`
+const quickstart = `const { pcm } = await blobToPcm(recorded)\nconst { text, modelVer } = await transcribe(pcm, (stage) => log(stage))`
 
 function copySecret(secret: string) {
   navigator.clipboard.writeText(secret).then(
@@ -230,261 +209,250 @@ export default function Dashboard() {
 
   return (
     <Shell>
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      <div>
         <h1 className="text-2xl font-semibold tracking-tight">developer console</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           local workspace · signed in as {getProfile() || "anon"} · nothing leaves this device
         </p>
-      </motion.div>
+      </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        {stats.map(([label, value, Icon], i) => (
-          <motion.div
-            key={label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 * i, duration: 0.35 }}
-          >
-            <Card className="border-border/60 transition-shadow hover:shadow-lg hover:shadow-primary/10">
-              <CardContent className="pt-5 pb-5">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Icon className="size-4" />
-                  <span className="text-xs uppercase tracking-widest">{label}</span>
-                </div>
-                {loaded ? (
-                  <p className="mt-2 font-mono text-2xl font-semibold">{value}</p>
-                ) : (
-                  <Skeleton className="mt-2 h-8 w-24" />
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+        {stats.map(([label, value, Icon]) => (
+          <Card key={label} className="border-border/60 transition-shadow hover:shadow-lg hover:shadow-primary/10">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon className="size-4" />
+                <span className="text-xs uppercase tracking-widest">{label}</span>
+              </div>
+              {loaded ? (
+                <p className="mt-2 font-mono text-2xl font-semibold">{value}</p>
+              ) : (
+                <Skeleton className="mt-2 h-8 w-24" />
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15, duration: 0.4 }}>
-        <Card className="mt-6 border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="size-4 text-primary" />
-              usage
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="flex overflow-hidden rounded-md border border-border/60">
-                {[7, 30].map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setChartDays(d)}
-                    className={`px-2 py-1 font-mono text-xs transition-colors ${
-                      chartDays === d
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {d}d
-                  </button>
-                ))}
-              </div>
-              <span className="font-mono text-xs text-muted-foreground">{scopeRuns.length} runs</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2 font-mono text-xs">
-                    <ListFilter className="size-3.5" />
-                    {scopeLabel}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setScope("live")}>
-                    live key
-                    {scope === "live" && <Check className="ml-auto size-3.5" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setScope("all")}>
-                    all keys
-                    {scope === "all" && <Check className="ml-auto size-3.5" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {(keys ?? []).map((k) => (
-                    <DropdownMenuItem key={k.id} onClick={() => setScope(k.id)}>
-                      {k.name}
-                      {k.revoked ? " (revoked)" : ""}
-                      {scope === k.id && <Check className="ml-auto size-3.5" />}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+      <Card className="mt-6 border-border/60">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <TrendingUp className="size-4 text-primary" />
+            usage
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="flex overflow-hidden rounded-md border border-border/60">
+              {[7, 30].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setChartDays(d)}
+                  className={`px-2 py-1 font-mono text-xs transition-colors ${
+                    chartDays === d
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {d}d
+                </button>
+              ))}
             </div>
-          </CardHeader>
-          <CardContent>
-            {!loaded ? (
-              <Skeleton className="h-11 w-full" />
-            ) : scopeRuns.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{emptyText}</p>
-            ) : (
-              <>
-                <Sparkbars counts={dailyCounts(scopeRuns, chartDays)} />
-                <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
-                  <span>{fmtDay(loadedAt - (chartDays - 1) * dayMs)}</span>
-                  <span>today</span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="mt-6 border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">api keys</CardTitle>
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="size-4" />
-              mint key
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              one key per project that embeds the dragon runtime. mark one as live and every studio
-              transcription ticks its counter. keys are generated and stored in this browser only —
-              they never leave the device.
-            </p>
-            {keys === null ? (
-              <div className="mt-4 space-y-2">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </div>
-            ) : keys.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">no keys yet. mint one for your next build.</p>
-            ) : (
-              <div className="mt-2 divide-y divide-border/60">
-                {keys.map((k) => (
-                  <div key={k.id} className="flex flex-wrap items-center gap-3 py-3">
-                    <div className="min-w-0 flex-1 basis-48">
-                      <p className="truncate text-sm font-medium">{k.name}</p>
-                      <p className="font-mono text-xs text-muted-foreground">{maskSecret(k.secret)}</p>
-                    </div>
-                    <span
-                      className="font-mono text-xs text-muted-foreground"
-                      title={k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : undefined}
-                    >
-                      used {fmtAgo(k.lastUsedAt)}
-                    </span>
-                    <span className="font-mono text-xs text-muted-foreground">{k.uses} runs</span>
-                    <span className="text-xs text-muted-foreground">{fmtDate(k.createdAt)}</span>
-                    {k.revoked ? (
-                      <Badge variant="outline" className="text-muted-foreground">revoked</Badge>
-                    ) : (
-                      <Badge className="border border-primary/30 bg-primary/15 text-primary">active</Badge>
-                    )}
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title={liveId === k.id ? "unmark live key" : "mark as live key"}
-                        onClick={() => toggleLive(k)}
-                      >
-                        {liveId === k.id ? (
-                          <CircleDot className="size-4 text-primary" />
-                        ) : (
-                          <Circle className="size-4" />
-                        )}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title="copy full key"
-                        onClick={() => copySecret(k.secret)}
-                      >
-                        <Copy className="size-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title={k.revoked ? "restore key" : "revoke key"}
-                        onClick={() => toggleRevoke(k)}
-                      >
-                        {k.revoked ? <RotateCcw className="size-4" /> : <Ban className="size-4" />}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title="delete key"
-                        onClick={() => removeKey(k.id)}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
+            <span className="font-mono text-xs text-muted-foreground">{scopeRuns.length} runs</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2 font-mono text-xs">
+                  <ListFilter className="size-3.5" />
+                  {scopeLabel}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setScope("live")}>
+                  live key
+                  {scope === "live" && <Check className="ml-auto size-3.5" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setScope("all")}>
+                  all keys
+                  {scope === "all" && <Check className="ml-auto size-3.5" />}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {(keys ?? []).map((k) => (
+                  <DropdownMenuItem key={k.id} onClick={() => setScope(k.id)}>
+                    {k.name}
+                    {k.revoked ? " (revoked)" : ""}
+                    {scope === k.id && <Check className="ml-auto size-3.5" />}
+                  </DropdownMenuItem>
                 ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {!loaded ? (
+            <Skeleton className="h-11 w-full" />
+          ) : scopeRuns.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{emptyText}</p>
+          ) : (
+            <>
+              <Sparkbars counts={dailyCounts(scopeRuns, chartDays)} />
+              <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+                <span>{fmtDay(loadedAt - (chartDays - 1) * dayMs)}</span>
+                <span>today</span>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25, duration: 0.4 }}>
-        <Card className="mt-6 border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Terminal className="size-4 text-primary" />
-              wire it up
-            </CardTitle>
-            <Link
-              to="/docs"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              embed guide
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ol className="list-decimal space-y-1 pl-4 text-sm text-muted-foreground">
-              <li>
-                copy <code className="font-mono text-foreground">src/stt</code> and{" "}
-                <code className="font-mono text-foreground">public/ort</code> into your app
-              </li>
-              <li>
-                bundle weights at{" "}
-                <code className="font-mono text-foreground">public/models/dragon-stt.onnx</code> with
-                vocab.json
-              </li>
-              <li>call the runtime from anywhere</li>
-            </ol>
-            <pre className="overflow-x-auto rounded-lg border border-border/60 bg-background p-4 font-mono text-xs leading-relaxed">
-              {quickstart}
-            </pre>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-6 border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">recent runs</CardTitle>
-            <Link
-              to="/history"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              all history
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {entries === null ? (
-              <>
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </>
-            ) : entries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">no runs yet.</p>
-            ) : (
-              entries.slice(0, 3).map((e) => (
-                <div key={e.id} className="rounded-lg border border-border/60 px-3 py-2">
-                  <p className="truncate text-sm">{e.text || "(empty)"}</p>
-                  <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                    {fmtDate(e.createdAt)} · {e.duration.toFixed(1)}s · {e.modelVer}
-                  </p>
+      <Card className="mt-6 border-border/60">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base">api keys</CardTitle>
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4" />
+            mint key
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            one key per project that embeds the dragon runtime. mark one as live and every studio
+            transcription ticks its counter. keys are generated and stored in this browser only —
+            they never leave the device.
+          </p>
+          {keys === null ? (
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : keys.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">no keys yet. mint one for your next build.</p>
+          ) : (
+            <div className="mt-2 divide-y divide-border/60">
+              {keys.map((k) => (
+                <div key={k.id} className="flex flex-wrap items-center gap-3 py-3">
+                  <div className="min-w-0 flex-1 basis-48">
+                    <p className="truncate text-sm font-medium">{k.name}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{maskSecret(k.secret)}</p>
+                  </div>
+                  <span
+                    className="font-mono text-xs text-muted-foreground"
+                    title={k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : undefined}
+                  >
+                    used {fmtAgo(k.lastUsedAt)}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">{k.uses} runs</span>
+                  <span className="text-xs text-muted-foreground">{fmtDate(k.createdAt)}</span>
+                  {k.revoked ? (
+                    <Badge variant="outline" className="text-muted-foreground">revoked</Badge>
+                  ) : (
+                    <Badge className="border border-primary/30 bg-primary/15 text-primary">active</Badge>
+                  )}
+                  <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title={liveId === k.id ? "unmark live key" : "mark as live key"}
+                      onClick={() => toggleLive(k)}
+                    >
+                      {liveId === k.id ? (
+                        <CircleDot className="size-4 text-primary" />
+                      ) : (
+                        <Circle className="size-4" />
+                      )}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="copy full key"
+                      onClick={() => copySecret(k.secret)}
+                    >
+                      <Copy className="size-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title={k.revoked ? "restore key" : "revoke key"}
+                      onClick={() => toggleRevoke(k)}
+                    >
+                      {k.revoked ? <RotateCcw className="size-4" /> : <Ban className="size-4" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="delete key"
+                      onClick={() => removeKey(k.id)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-border/60">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Terminal className="size-4 text-primary" />
+            wire it up
+          </CardTitle>
+          <Link
+            to="/docs"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            embed guide
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ol className="list-decimal space-y-1 pl-4 text-sm text-muted-foreground">
+            <li>
+              copy <code className="font-mono text-foreground">src/stt</code> and{" "}
+              <code className="font-mono text-foreground">public/ort</code> into your app
+            </li>
+            <li>
+              bundle weights at{" "}
+              <code className="font-mono text-foreground">public/models/dragon-stt.onnx</code> with
+              vocab.json
+            </li>
+            <li>call the runtime from anywhere</li>
+          </ol>
+          <pre className="overflow-x-auto rounded-lg border border-border/60 bg-background p-4 font-mono text-xs leading-relaxed">
+            {quickstart}
+          </pre>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-border/60">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base">recent runs</CardTitle>
+          <Link
+            to="/history"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            all history
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {entries === null ? (
+            <>
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </>
+          ) : entries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">no runs yet.</p>
+          ) : (
+            entries.slice(0, 3).map((e) => (
+              <div key={e.id} className="rounded-lg border border-border/60 px-3 py-2">
+                <p className="truncate text-sm">{e.text || "(empty)"}</p>
+                <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                  {fmtDate(e.createdAt)} · {e.duration.toFixed(1)}s · {e.modelVer}
+                </p>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">

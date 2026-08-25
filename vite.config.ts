@@ -18,17 +18,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router'],
-          'convex-vendor': ['convex'],
-          'radix-ui': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-label',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-tooltip',
-          ],
-          'framer-motion': ['framer-motion'],
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
@@ -47,15 +36,12 @@ export default defineConfig({
       'react-dom',
       'react-dom/client',
       'react-router',
-      '@convex-dev/auth/react',
-      'framer-motion',
+      '@vly-ai/integrations',
     ],
   },
   server: {
     host: true,
     port: 5173,
-    hmr: {
-      overlay: false,
-    },
+    hmr: false,
   },
 });

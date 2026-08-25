@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Mic, Play } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Kbd } from "@/components/ui/kbd"
+import { Button, Card, CardContent, Input, Kbd } from "@/ui"
 import { Waveform } from "@/components/waveform"
 import { Shell } from "@/components/shell"
-import { blobToPcm } from "@/stt/audio"
-import { getEngineState, onEngineState, transcribe } from "@/stt/engine"
-import { addEntry } from "@/lib/db"
-import { getProfile, setProfile } from "@/lib/profile"
+import { blobToPcm, getEngineState, onEngineState, transcribe, installWeightsFromUrl, remoteWeightsUrl } from "@/stt/engine"
+import { addEntry, getProfile, setProfile } from "@/lib/db"
 import { recordKeyUse } from "@/lib/keys"
-import { installWeightsFromUrl, remoteWeightsUrl } from "@/lib/weightsFetch"
 
 const stages = ["decoding audio", "extracting features", "running dragon stt", "done"]
 
@@ -104,7 +98,6 @@ export default function Studio() {
     setRecording(false)
     setStage("decoding audio")
   }, [])
-
 
   const onUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

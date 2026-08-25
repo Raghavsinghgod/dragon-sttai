@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { Flame, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Button, Card, CardContent, Input } from "@/ui"
 import { Shell } from "@/components/shell"
 import { Bench } from "@/components/bench"
-import { getEngineState, getEngineSource, modelCard, onEngineState, resetEngine, warmup } from "@/stt/engine"
-import { clearModel, getWeights, parseVocab, saveVocab, saveWeights, type storedWeights } from "@/lib/modelStore"
-import { installWeightsFromUrl } from "@/lib/weightsFetch"
+import { getEngineState, getEngineSource, modelCard, onEngineState, resetEngine, warmup, installWeightsFromUrl } from "@/stt/engine"
+import { clearModel, getWeights, parseVocab, saveVocab, saveWeights, type storedWeights } from "@/lib/db"
 
 const stateLabel: Record<string, string> = {
   cold: "cold",

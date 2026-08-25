@@ -1,6 +1,5 @@
-import { motion } from "framer-motion"
 import { Link } from "react-router"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/ui"
 import { DragonGlyph } from "@/pages/landing"
 
 export default function NotFound() {
@@ -15,12 +14,7 @@ export default function NotFound() {
         }}
       />
       <main className="relative flex-1 flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-md w-full py-20"
-        >
+        <div className="text-center max-w-md w-full py-20">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">error 404</p>
           <DragonGlyph className="w-16 h-16 mx-auto mt-8 mb-6 text-primary/30" />
           <h1 className="text-5xl font-bold tracking-tighter">gone in the smoke</h1>
@@ -35,7 +29,7 @@ export default function NotFound() {
               <Link to="/studio">open studio</Link>
             </Button>
           </div>
-        </motion.div>
+        </div>
       </main>
     </div>
   )
