@@ -579,7 +579,7 @@ export async function transcribe(
   }
 }
 
-const remoteWeightsUrl =
+export const remoteWeightsUrl =
   "https://huggingface.co/Xenova/wav2vec2-base-960h/resolve/main/onnx/model_quantized.onnx"
 
 function joinBytes(parts: Uint8Array[], total: number): ArrayBuffer {
