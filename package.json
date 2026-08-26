@@ -7,6 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@vly-ai/integrations": "^0.6.13",
     "onnxruntime-web": "^1.27.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
