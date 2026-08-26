@@ -3,7 +3,7 @@ import { FileAudio } from "@/icons"
 import { Link } from "react-router"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Skeleton } from "@/ui"
-import { Shell } from "@/components/shell"
+import { Shell } from "@/shell"
 import { deleteEntry, listEntries, type historyEntry } from "@/lib/db"
 
 export default function HistoryPage() {

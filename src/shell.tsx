@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router"
-import { DragonGlyph } from "@/pages/landing"
+import { DragonGlyph } from "@/landing"
 
 const links = [
   ["/studio", "studio"],
@@ -16,7 +16,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <nav className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-primary transition-opacity hover:opacity-80">
             <DragonGlyph className="w-5 h-5" />
-            <span className="font-semibold tracking-wide">dragon stt</span>
+            <span className="font-semibold">dragon stt</span>
           </Link>
           <div className="flex items-center gap-3 text-xs text-muted-foreground sm:gap-4 sm:text-sm">
             {links.map(([to, label]) => (
@@ -34,7 +34,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8">{children}</main>
-      <footer className="border-t border-border/60 py-3 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+      <footer className="border-t border-border/60 py-3 text-center font-mono text-[10px] text-muted-foreground">
         offline · local only · nothing phones home
       </footer>
     </div>

@@ -1,11 +1,11 @@
 {
   "name": "dragon stt",
   "short_name": "dragon stt",
-  "description": "offline speech to text. nothing leaves the device.",
+  "description": "offline speech-to-text that runs entirely in your browser",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#16110d",
-  "theme_color": "#e8632c",
+  "background_color": "#000000",
+  "theme_color": "#dc2626",
   "icons": [
     {
       "src": "/logo.svg",

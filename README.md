@@ -1,29 +1,44 @@
 # dragon stt
 
-offline speech to text that runs entirely in the browser. record or upload audio, get text, keep it local. no accounts, no servers, no inference calls — after first load it works with the network off.
+speech to text that runs in your browser. no server. no account. no api calls.
+
+record audio or upload a file, get text back. the model lives in your tab. after first load you can go offline and it still works.
+
+## what it does
+- record from mic or upload audio (up to 200mb)
+- runs wav2vec2 int8 quantized via webassembly
+- shows waveform while recording
+- saves history to indexeddb
+- tracks usage per api key from the console
+- bundles its own weights at /models, never phones home
 
 ## stack
+react 19, typescript, vite, tailwind 4, onnxruntime-web. persistence in indexeddb + localstorage.
 
-react 19, typescript, vite, tailwind 4, framer motion. inference via onnxruntime-web (wasm, single thread). persistence in indexeddb and localstorage. bun for scripts and tests.
-
-## layout
-
-- src/pages — landing, studio, dashboard (console), history, model, docs
-- src/stt — audio decode, fft + log-mel features, onnx engine, ctc decode, scoring
-- src/lib — history db, api keys + per-key usage, installed weights store, starter bundle, chart bucketing
-- src/components — waveform canvas, bench, shell
-- training — python toolkit that produces the bundled weights (see training/README.md)
-- public/models — dragon-stt.onnx + vocab.json, bundled, never fetched at runtime
-
-## commands
-
+## run it
 ```
-bun install
-bun tsc -b --noEmit
-bun run lint
-bun run test:coverage
+npm install
+npm run dev
 ```
+open localhost, allow mic, talk.
 
-## weights
+## how it works
+audio comes in as a blob, gets resampled to 16khz mono float32, then runs through the onnx model in chunks of 25 seconds so long clips dont freeze the page. ctc greedy decode turns the output into text. all of this happens in webassembly inside your browser tab.
 
-the default model is wav2vec2-base-960h, int8 dynamic quantized, apache-2.0, re-exported as dragon-stt. train your own with the toolkit in training/ and install the export from the model page — installed weights live in indexeddb and win over the bundled ones.
+the model is wav2vec2-base-960h, int8 dynamic quantized, 91mb. its bundled in public/models and loaded into indexeddb on first run. you can also install your own weights from the model page.
+
+## pages
+- /studio — record, upload, transcribe
+- /console — api keys, usage charts
+- /history — past transcriptions from indexeddb
+- /model — download or install weights
+- /docs — api reference
+
+## notes
+- this started as a prompt engineering project, not a traditional coding one
+- the architecture went through several rewrites before landing here
+- inference is single-threaded wasm, so very long clips take time
+- the model sometimes outputs silence on certain audio formats — still debugging that
+- built across a helio g35 android phone and a cyber cafe pc
+
+raghav singh

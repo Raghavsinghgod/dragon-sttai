@@ -4,13 +4,13 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 
-const Landing = lazy(() => import("./pages/landing.tsx"));
-const Dashboard = lazy(() => import("./pages/dashboard.tsx"));
-const Docs = lazy(() => import("./pages/docs.tsx"));
-const Studio = lazy(() => import("./pages/studio.tsx"));
-const HistoryPage = lazy(() => import("./pages/history.tsx"));
-const ModelPage = lazy(() => import("./pages/model.tsx"));
-const NotFound = lazy(() => import("./pages/notfound.tsx"));
+const Landing = lazy(() => import("./landing.tsx"));
+const Dashboard = lazy(() => import("./dashboard.tsx"));
+const Docs = lazy(() => import("./docs.tsx"));
+const Studio = lazy(() => import("./studio.tsx"));
+const HistoryPage = lazy(() => import("./history.tsx"));
+const ModelPage = lazy(() => import("./model.tsx"));
+const NotFound = lazy(() => import("./notfound.tsx"));
 
 function RouteLoading() {
   return (

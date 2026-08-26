@@ -2,7 +2,7 @@ import { toast } from "sonner"
 import { Copy, Download } from "@/icons"
 import { Link } from "react-router"
 import { Button } from "@/ui"
-import { Shell } from "@/components/shell"
+import { Shell } from "@/shell"
 import { bundleText, downloadBlob, makeZip, type filePair } from "@/lib/db"
 import { vocab } from "@/stt/engine"
 

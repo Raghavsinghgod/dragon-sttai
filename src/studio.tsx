@@ -2,11 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Mic, Play } from "@/icons"
 import { toast } from "sonner"
 import { Button, Card, CardContent, Input, Kbd } from "@/ui"
-import { Waveform } from "@/components/waveform"
-import { Shell } from "@/components/shell"
+import { Waveform } from "@/waveform"
+import { Shell } from "@/shell"
 import { blobToPcm, getEngineState, onEngineState, transcribe, installWeightsFromUrl, remoteWeightsUrl } from "@/stt/engine"
-import { addEntry, getProfile, setProfile } from "@/lib/db"
-import { recordKeyUse } from "@/lib/keys"
+import { addEntry, getProfile, recordKeyUse, setProfile } from "@/lib/db"
 
 const stages = ["decoding audio", "extracting features", "running dragon stt", "done"]
 

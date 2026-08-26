@@ -19,20 +19,22 @@ import {
 } from "@/icons"
 import { Link } from "react-router"
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Input, Skeleton } from "@/ui"
-import { Shell } from "@/components/shell"
-import { dailyCounts, dayMs } from "@/lib/keys"
-import { listEntries, type historyEntry } from "@/lib/db"
-import { getProfile } from "@/lib/db"
+import { Shell } from "@/shell"
 import {
   createKey,
+  dailyCounts,
+  dayMs,
   deleteKey,
   getActiveKeyId,
+  getProfile,
+  listEntries,
   listKeys,
   maskSecret,
   setActiveKey,
   setRevoked,
   type apiKey,
-} from "@/lib/keys"
+  type historyEntry,
+} from "@/lib/db"
 
 const quickstart = `const { pcm } = await blobToPcm(recorded)\nconst { text, modelVer } = await transcribe(pcm, (stage) => log(stage))`
 
@@ -222,7 +224,7 @@ export default function Dashboard() {
             <CardContent className="pt-5 pb-5">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Icon className="size-4" />
-                <span className="text-xs uppercase tracking-widest">{label}</span>
+                <span className="text-xs">{label}</span>
               </div>
               {loaded ? (
                 <p className="mt-2 font-mono text-2xl font-semibold">{value}</p>
