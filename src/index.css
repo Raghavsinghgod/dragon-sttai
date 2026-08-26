@@ -118,12 +118,6 @@
   }
 }
 
-@keyframes glyph-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-.animate-glyph-float { animation: glyph-float 5s ease-in-out 0.5s infinite; }
-
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
